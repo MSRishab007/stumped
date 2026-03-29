@@ -1,11 +1,10 @@
-/* Reset browser defaults to remove white gaps */
 html, body, #root {
   margin: 0;
   padding: 0;
   width: 100%;
   min-height: 100vh;
   overflow-x: hidden;
-  background-color: #f3eee1; /* Matches the Poeltl background */
+  background-color: #f3eee1; 
 }
 
 * {

@@ -9,18 +9,15 @@ const Landing = () => {
     <div className="landing-wrapper">
       <div className="landing-content">
         
-        {/* Main Logo */}
         <div className="logo-section">
           <h1 className="stumped-logo">Stumped</h1>
         </div>
 
-        {/* Text Section */}
         <div className="text-section">
-          <h2 className="main-subtext">The NBPA Player Guessing Game</h2>
+          <h2 className="main-subtext">The IPL Legend Guessing Game</h2>
           <p className="guess-count-text">Guess the mystery player in 7 guesses!</p>
         </div>
 
-        {/* Play Button */}
         <div className="button-section">
           <button 
             onClick={() => navigate('/play')}
