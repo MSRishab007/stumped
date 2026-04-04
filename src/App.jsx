@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Landing from './components/Landing';
-import MainGame from './components/main'; 
+import MainGame from './components/mainPage'; 
 import './App.css';
 
 function App() {
