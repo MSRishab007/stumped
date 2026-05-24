@@ -68,6 +68,7 @@ with open(csv_filename, mode='r', encoding='utf-8') as csv_file:
                 "matches": safe_int(row.get('matches')),
                 "runs": safe_int(row.get('runs')),
                 "wickets": safe_int(row.get('wickets')),
+                "isTargetable": safe_int(row.get('istargetable')) == 1,
                 "espnLink": row.get('playerlink', '').strip()
             }
             
