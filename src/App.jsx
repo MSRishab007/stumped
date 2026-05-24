@@ -20,7 +20,6 @@ export default function App() {
     return 'playing';
   });
 
-  // Sync state changes over to localStorage automatically
   useEffect(() => {
     const stateToSave = { date: activeDate, gameStatus: gameStatus, guesses: guesses };
     localStorage.setItem(`ipl-legends-game-${activeDate}`, JSON.stringify(stateToSave));
