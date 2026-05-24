@@ -2,7 +2,7 @@ import csv
 import json
 
 # --- CONFIGURATION ---
-LIMIT_ENTRIES = 1  
+LIMIT_ENTRIES = 5
 
 csv_filename = r"scripts\players.csv"
 json_filename = r"scripts\players.json"    

@@ -1,9 +1,9 @@
 id,name,team,pastTeams,role,battingHand,debutYear,auctionPrice,matches,runs,wickets,playerLink
-1,Ruturaj Gaikwad,CSK,,Top Order Batter,Right,2020,18.00,85,2839,0,https://www.espncricinfo.com/cricketers/ruturaj-gaikwad-1060380
-2,Dewald Brevis,CSK,,Middle Order Batter,Right,,,,,,https://www.espncricinfo.com/cricketers/dewald-brevis-1070665
-3,MS Dhoni,CSK,,Wicketkeeper Batter,Right,,,,,,https://www.espncricinfo.com/cricketers/ms-dhoni-28081
-4,Kartik Sharma,CSK,,Wicketkeeper Batter,Right,,,,,,https://www.espncricinfo.com/cricketers/kartik-sharma-1459392
-5,Sarfaraz Khan,CSK,,Middle Order Batter,Right,,,,,,https://www.espncricinfo.com/cricketers/sarfaraz-khan-642525
+1,Ruturaj Gaikwad,CSK,,Top Order Batter,Right,2020,1800,85,2839,0,https://www.espncricinfo.com/cricketers/ruturaj-gaikwad-1060380
+2,Dewald Brevis,CSK,MI,Middle Order Batter,Right,2022,220,27,606,1,https://www.espncricinfo.com/cricketers/dewald-brevis-1070665
+3,MS Dhoni,CSK,RPSG,Wicketkeeper Batter,Right,2008,400,278,5439,0,https://www.espncricinfo.com/cricketers/ms-dhoni-28081
+4,Kartik Sharma,CSK,,Wicketkeeper Batter,Right,2026,1420,11,295,0,https://www.espncricinfo.com/cricketers/kartik-sharma-1459392
+5,Sarfaraz Khan,CSK,"RCB,PBKS,DC",Middle Order Batter,Right,2015,75,58,746,0,https://www.espncricinfo.com/cricketers/sarfaraz-khan-642525
 6,Ayush Mhatre,CSK,,Top Order Batter,Right,,,,,,https://www.espncricinfo.com/cricketers/ayush-mhatre-1452455
 7,Urvil Patel,CSK,,Wicketkeeper Batter,Right,,,,,,https://www.espncricinfo.com/cricketers/urvil-patel-1131570
 8,Sanju Samson,CSK,,Wicketkeeper Batter,Right,,,,,,https://www.espncricinfo.com/cricketers/sanju-samson-425943

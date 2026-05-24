@@ -7,10 +7,74 @@
     "role": "Top Order Batter",
     "battingHand": "Right",
     "debutYear": 2020,
-    "currentPrice": 18.0,
+    "currentPrice": 1800.0,
     "matches": 85,
     "runs": 2839,
     "wickets": 0,
     "espnLink": "https://www.espncricinfo.com/cricketers/ruturaj-gaikwad-1060380"
+  },
+  {
+    "id": 2,
+    "name": "Dewald Brevis",
+    "currentTeam": "CSK",
+    "pastTeams": [
+      "MI"
+    ],
+    "role": "Middle Order Batter",
+    "battingHand": "Right",
+    "debutYear": 2022,
+    "currentPrice": 220.0,
+    "matches": 27,
+    "runs": 606,
+    "wickets": 1,
+    "espnLink": "https://www.espncricinfo.com/cricketers/dewald-brevis-1070665"
+  },
+  {
+    "id": 3,
+    "name": "MS Dhoni",
+    "currentTeam": "CSK",
+    "pastTeams": [
+      "RPSG"
+    ],
+    "role": "Wicketkeeper Batter",
+    "battingHand": "Right",
+    "debutYear": 2008,
+    "currentPrice": 400.0,
+    "matches": 278,
+    "runs": 5439,
+    "wickets": 0,
+    "espnLink": "https://www.espncricinfo.com/cricketers/ms-dhoni-28081"
+  },
+  {
+    "id": 4,
+    "name": "Kartik Sharma",
+    "currentTeam": "CSK",
+    "pastTeams": [],
+    "role": "Wicketkeeper Batter",
+    "battingHand": "Right",
+    "debutYear": 2026,
+    "currentPrice": 1420.0,
+    "matches": 11,
+    "runs": 295,
+    "wickets": 0,
+    "espnLink": "https://www.espncricinfo.com/cricketers/kartik-sharma-1459392"
+  },
+  {
+    "id": 5,
+    "name": "Sarfaraz Khan",
+    "currentTeam": "CSK",
+    "pastTeams": [
+      "RCB",
+      "PBKS",
+      "DC"
+    ],
+    "role": "Middle Order Batter",
+    "battingHand": "Right",
+    "debutYear": 2015,
+    "currentPrice": 75.0,
+    "matches": 58,
+    "runs": 746,
+    "wickets": 0,
+    "espnLink": "https://www.espncricinfo.com/cricketers/sarfaraz-khan-642525"
   }
 ]
