@@ -37,6 +37,7 @@ export function getDailyPlayerForDate(customDateStr) {
   const startUTC = Date.UTC(LAUNCH_DATE.getFullYear(), LAUNCH_DATE.getMonth(), LAUNCH_DATE.getDate());
   const currentUTC = Date.UTC(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate());
   
+  const msPerDay = 24 * 60 * 60 * 1000;
   const daysElapsed = Math.floor((currentUTC - startUTC) / msPerDay);
   const safeGameDay = daysElapsed < 0 ? 0 : daysElapsed;
 
