@@ -50,6 +50,7 @@ const compareNumeric = (guessVal, targetVal, threshold) => {
 const cleanRole = (role) => role ? role.replace(/-/g, ' ').toLowerCase() : '';
 
 export function getGuessResult(guess, target) {
+  
   const result = {
     isExactMatch: guess.id === target.id,
     team: { status: 'wrong' },
@@ -66,17 +67,19 @@ export function getGuessResult(guess, target) {
   };
 
   // --- TEAM LOGIC ---
-  const guessTeams = [guess.currentFranchise, ...(guess.pastTeams || [])];
-  const targetTeams = [target.currentFranchise, ...(target.pastTeams || [])];
-
+  let teamStatus = 'wrong';
+  
   if (guess.currentFranchise === target.currentFranchise) {
-    result.team.status = 'exact';
-  } else {
-    // If they share any team in their history
-    const hasOverlap = guessTeams.some(team => targetTeams.includes(team));
-    if (hasOverlap) result.team.status = 'partial';
+    // Exactly the same current team
+    teamStatus = 'exact';
+  } else if (
+    // Guessed player's current team is one of the target's old teams
+    (target.pastFranchises && target.pastFranchises.includes(guess.currentFranchise)) 
+  ) {
+    teamStatus = 'partial';
   }
 
+  result.team.status = teamStatus;
   // --- ROLE LOGIC ---
   const gRole = cleanRole(guess.role);
   const tRole = cleanRole(target.role);

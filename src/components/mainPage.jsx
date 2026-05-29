@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { HelpCircle, BarChart2, Info, History, User, X } from 'lucide-react';
+import { HelpCircle, BarChart2, Info, History, User, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import SearchBar from './SearchBar'; 
 import { getDailyPlayerForDate } from '../utils/dailyPlayer';
 import { getGuessResult } from '../utils/gameLogic';
@@ -10,32 +10,35 @@ const getTodayStr = () => {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 };
 
+const LAUNCH_DATE = new Date(2026, 2, 24); // March 24, 2026
+
 const DEFAULT_STATS = {
   gamesPlayed: 0,
   gamesWon: 0,
   currentStreak: 0,
   maxStreak: 0,
   distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0 },
-  history: {}
+  history: {} // Records: { "YYYY-MM-DD": { status: "won" | "lost", guesses: X, time: Y } }
 };
 
 const MainGame = () => {
   const MAX_GUESSES = 7;
-  const todayStr = getTodayStr();
+  const realTodayStr = getTodayStr();
 
-  // --- COMPONENT STATES ---
-  const [targetPlayer, setTargetPlayer] = useState(() => getDailyPlayerForDate());
+  // --- TIME MACHINE STATES ---
+  const [activeDate, setActiveDate] = useState(realTodayStr);
+  const [targetPlayer, setTargetPlayer] = useState(() => getDailyPlayerForDate(activeDate));
   
-  // Controls what is shown in the top display space (null, 'silhouette', 'stats', 'help', 'about', 'flashback')
+  // Calendar Navigation View States
+  const [calMonth, setCalMonth] = useState(new Date().getMonth());
+  const [calYear, setCalYear] = useState(new Date().getFullYear());
+
   const [activeModal, setActiveModal] = useState(null); 
 
+  // --- GAME STATES (Tied to activeDate) ---
   const [gameState, setGameState] = useState(() => {
-    const saved = localStorage.getItem('stumped_gameState');
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      if (parsed.date === todayStr) return parsed;
-    }
-    return { date: todayStr, guesses: [], status: 'playing', usedSilhouette: false };
+    const saved = localStorage.getItem(`stumped_gameState_${activeDate}`);
+    return saved ? JSON.parse(saved) : { date: activeDate, guesses: [], status: 'playing', usedSilhouette: false };
   });
 
   const [stats, setStats] = useState(() => {
@@ -44,91 +47,185 @@ const MainGame = () => {
   });
 
   const [seconds, setSeconds] = useState(() => {
-    const savedTime = localStorage.getItem(`stumped_timer_${todayStr}`);
+    const savedTime = localStorage.getItem(`stumped_timer_${activeDate}`);
     return savedTime ? parseInt(savedTime, 10) : 0;
   });
 
   const { guesses, status: gameStatus, usedSilhouette } = gameState;
 
-  // --- PERSISTENCE ---
-  useEffect(() => localStorage.setItem('stumped_gameState', JSON.stringify(gameState)), [gameState]);
+  // --- RUNTIME EFFECTS ---
+  // Re-sync components whenever the user switches dates on the calendar
+  useEffect(() => {
+    setTargetPlayer(getDailyPlayerForDate(activeDate));
+    
+    const savedState = localStorage.getItem(`stumped_gameState_${activeDate}`);
+    setGameState(savedState ? JSON.parse(savedState) : { date: activeDate, guesses: [], status: 'playing', usedSilhouette: false });
+    
+    const savedTime = localStorage.getItem(`stumped_timer_${activeDate}`);
+    setSeconds(savedTime ? parseInt(savedTime, 10) : 0);
+  }, [activeDate]);
+
+  // Save states to local storage on mutation
+  useEffect(() => localStorage.setItem(`stumped_gameState_${activeDate}`, JSON.stringify(gameState)), [gameState, activeDate]);
   useEffect(() => localStorage.setItem('stumped_stats', JSON.stringify(stats)), [stats]);
 
+  // Stopwatch effect loop
   useEffect(() => {
     if (gameStatus !== 'playing') return;
     const interval = setInterval(() => {
       setSeconds(s => {
         const nextTime = s + 1;
-        localStorage.setItem(`stumped_timer_${todayStr}`, nextTime.toString());
+        localStorage.setItem(`stumped_timer_${activeDate}`, nextTime.toString());
         return nextTime;
       });
     }, 1000);
     return () => clearInterval(interval);
-  }, [gameStatus, todayStr]);
+  }, [gameStatus, activeDate]);
 
-  // --- UI TOGGLES ---
   const toggleModal = (modalName) => {
     if (activeModal === modalName) {
-      setActiveModal(null); // Close if clicking the same button
+      setActiveModal(null);
     } else {
-      setActiveModal(modalName); // Open new panel
-      
-      // If silhouette is opened during active play, mark it as used in storage eternally
+      setActiveModal(modalName);
       if (modalName === 'silhouette' && gameStatus === 'playing' && !usedSilhouette) {
         setGameState(prev => ({ ...prev, usedSilhouette: true }));
       }
     }
   };
 
-  // --- GAME LOGIC ---
-  const handleGuessSubmit = (chosenPlayer) => {
+  // --- GAME CONCLUSION & ACCUMULATION ENGINE ---
+const handleGuessSubmit = (chosenPlayer) => {
+    // Prevent duplicate guesses or submission if game already ended
     if (guesses.some(g => g.id === chosenPlayer.id) || gameStatus !== 'playing') return;
 
     const updatedGuesses = [...guesses, chosenPlayer];
     let newStatus = 'playing';
 
+    // Check Win/Loss conditions
     if (chosenPlayer.id === targetPlayer.id) {
       newStatus = 'won';
-      setActiveModal('silhouette'); // Auto-reveal on win
+      setActiveModal('silhouette'); // Automatically reveal player card on win
     } else if (updatedGuesses.length >= MAX_GUESSES) {
       newStatus = 'lost';
-      setActiveModal('silhouette'); // Auto-reveal on loss
+      setActiveModal('silhouette'); // Reveal player card on loss
     }
 
+    // --- UPDATE INDIVIDUAL DAY STATE ---
+    // This executes for both 'Today' and 'Flashback' games so progress persists per day
     setGameState(prev => ({ ...prev, guesses: updatedGuesses, status: newStatus }));
 
+    // --- IMPLEMENT PRACTICE MODE LOGIC ---
+    // Per previous agreement, Flashback games are 'Practice Mode'.
+    // If this is a past game, stop here. Do not update aggregate lifetime stats, 
+    // streaks, or the history ledger used for coloring the calendar.
+    if (activeDate !== realTodayStr) return;
+
+    // --- UPDATE GLOBAL STATS (Only for Today's Live Game) ---
     if (newStatus !== 'playing') {
       setStats(prev => {
         const newStats = { ...prev };
-        if (!newStats.history[todayStr]) {
+        
+        // Safety check to prevent duplicate aggregation
+        if (!newStats.history[activeDate]) {
           newStats.gamesPlayed += 1;
+          
+          // Update distribution (Bucket 8 is for losses)
+          const distBucket = newStatus === 'won' ? updatedGuesses.length : 8;
+          newStats.distribution[distBucket] += 1;
+          
           if (newStatus === 'won') {
             newStats.gamesWon += 1;
+            // Increment streaks (already guarded by activeDate === realTodayStr check above)
             newStats.currentStreak += 1;
             newStats.maxStreak = Math.max(newStats.maxStreak, newStats.currentStreak);
-            newStats.distribution[updatedGuesses.length] += 1;
           } else {
+            // Reset streak on loss
             newStats.currentStreak = 0;
-            newStats.distribution[8] += 1;
           }
-          newStats.history[todayStr] = {
+
+          // Commit to the history ledger used for UI calendar coloring
+          newStats.history[activeDate] = {
             status: newStatus,
             guesses: updatedGuesses.length,
-            usedSilhouette: gameState.usedSilhouette || (activeModal === 'silhouette'), // catch edge cases
-            time: seconds
+            // Track if silhouette was used either previously or via auto-reveal on end
+            usedSilhouette: usedSilhouette || (activeModal === 'silhouette'),
+            time: seconds // Capture end time
           };
         }
         return newStats;
       });
     }
   };
+  // --- TIME MACHINE CALENDAR GENERATION ---
+  const handlePrevMonth = () => {
+    if (calMonth === 0) { setCalMonth(11); setCalYear(y => y - 1); } 
+    else { setCalMonth(m => m - 1); }
+  };
 
+  const handleNextMonth = () => {
+    if (calMonth === 11) { setCalMonth(0); setCalYear(y => y + 1); } 
+    else { setCalMonth(m => m + 1); }
+  };
+
+ const renderCalendarDays = () => {
+    const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+    const firstDayIndex = new Date(calYear, calMonth, 1).getDay();
+    const days = [];
+
+    // Empty offset slots
+    for (let i = 0; i < firstDayIndex; i++) {
+      days.push(<div key={`empty-${i}`} className="cal-day empty"></div>);
+    }
+
+    for (let i = 1; i <= daysInMonth; i++) {
+      const cellDateStr = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+      const cellDateObj = new Date(calYear, calMonth, i);
+      
+      const isBeforeLaunch = cellDateObj < LAUNCH_DATE;
+      const isFuture = cellDateStr > realTodayStr;
+      const dayRecord = stats.history[cellDateStr];
+      
+      let dayClass = "cal-day ";
+      
+      if (isBeforeLaunch || isFuture) {
+        dayClass += "disabled ";
+      } else {
+        // 1. First, check if there is a win/loss record
+        if (dayRecord) {
+          dayClass += dayRecord.status === 'won' ? "won " : "lost ";
+        } else {
+          dayClass += "playable ";
+        }
+
+        // 2. Then, independently apply the highlight if it's the day we are currently viewing
+        if (cellDateStr === activeDate) {
+          dayClass += "active-selection ";
+        }
+      }
+
+      days.push(
+        <div 
+          key={i} 
+          className={dayClass}
+          onClick={() => {
+            if (!isBeforeLaunch && !isFuture) {
+              setActiveDate(cellDateStr);
+              setActiveModal(null); 
+            }
+          }}
+        >
+          {i}
+        </div>
+      );
+    }
+    return days;
+  };
   const formatTime = (s) => new Date(s * 1000).toISOString().substr(11, 8);
   const getBoxClass = (status) => status === 'exact' ? 'box-exact' : status === 'partial' ? 'box-partial' : 'box-wrong';
   const renderArrow = (dir) => dir === 'up' ? ' ↑' : dir === 'down' ? ' ↓' : '';
   const emptyRowsCount = Math.max(0, MAX_GUESSES - guesses.length);
-
   const winPercentage = stats.gamesPlayed > 0 ? Math.round((stats.gamesWon / stats.gamesPlayed) * 100) : 0;
+  const displayDateStr = new Date(activeDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
   return (
     <div className="main-game-wrapper">
@@ -148,33 +245,57 @@ const MainGame = () => {
         </div>
       </header>
 
+      {/* ACTIVE TIME MACHINE ALERT BANNER */}
+      {activeDate !== realTodayStr && (
+        <div className="flashback-banner">
+          ⏳ You are exploring a past match archive: <strong>{displayDateStr}</strong>
+          <button className="return-today-btn" onClick={() => setActiveDate(realTodayStr)}>Return to Today</button>
+        </div>
+      )}
+
       <hr className="separator" />
 
       <main className="game-content">
-        
-        {/* --- DYNAMIC DISPLAY PANEL --- */}
-       <div className="display-panel-container">
+        <div className="display-panel-container">
           
-          {/* SILHOUETTE & POST-GAME REVEAL VIEW */}
+          {/* FLASHBACK INTERACTIVE MODAL */}
+          {activeModal === 'flashback' && (
+            <div className="panel-card flashback-panel">
+               <div className="stats-header">
+                <h3>Time Machine</h3>
+                <button className="close-btn" onClick={() => setActiveModal(null)}><X size={20} color="red"/> Close</button>
+              </div>
+              <div className="calendar-container">
+                <div className="cal-header">
+                  <button onClick={handlePrevMonth}><ChevronLeft/></button>
+                  <h4>{new Date(calYear, calMonth).toLocaleString('default', { month: 'long', year: 'numeric' })}</h4>
+                  <button onClick={handleNextMonth}><ChevronRight/></button>
+                </div>
+                <div className="cal-grid-labels">
+                  <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+                </div>
+                <div className="cal-grid">
+                  {renderCalendarDays()}
+                </div>
+                <div className="cal-legend">
+                  <span className="legend-item"><div className="box green"></div> Solved</span>
+                  <span className="legend-item"><div className="box red"></div> Failed</span>
+                  <span className="legend-item"><div className="box grey"></div> Unplayed</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* SILHOUETTE & FINAL POST-GAME REVEAL METRIC CARD */}
           {activeModal === 'silhouette' && targetPlayer?.imageLink && (
             gameStatus === 'playing' ? (
-              // ACTIVE GAME: Transparent silhouette container
               <div className="transparent-panel image-panel">
-                <img 
-                  src={targetPlayer.imageLink} 
-                  alt="Mystery Player" 
-                  className="image-hidden"
-                />
+                <img src={targetPlayer.imageLink} alt="Mystery Silhouette" className="image-hidden" />
               </div>
             ) : (
-              // POST-GAME: Revealed card with player statistics
               <div className="panel-card player-reveal-card">
                 <div className="reveal-image-container">
-                  <img 
-                    src={targetPlayer.imageLink} 
-                    alt={targetPlayer.name} 
-                    className="image-revealed"
-                  />
+                  <img src={targetPlayer.imageLink} alt={targetPlayer.name} className="image-revealed" />
                 </div>
                 <div className="reveal-stats-container">
                   <h3>{targetPlayer.name}</h3>
@@ -193,11 +314,11 @@ const MainGame = () => {
             )
           )}
 
-          {/* STATS VIEW (Poeltl Style) */}
+          {/* LCG LIFETIME GLOBAL STATISTICS */}
           {activeModal === 'stats' && (
             <div className="panel-card stats-panel">
               <div className="stats-header">
-                <h3>Statistics</h3>
+                <h3>Performance Analytics</h3>
                 <button className="close-btn" onClick={() => setActiveModal(null)}><X size={20} color="red"/> Close</button>
               </div>
               <div className="stats-content">
@@ -206,7 +327,6 @@ const MainGame = () => {
                   <div className="chart-wrapper">
                     {[1, 2, 3, 4, 5, 6, 7, 8].map(num => {
                       const count = stats.distribution[num] || 0;
-                      // Math to make highest bar 100% height
                       const maxCount = Math.max(...Object.values(stats.distribution), 1);
                       const heightPct = (count / maxCount) * 100;
                       return (
@@ -221,41 +341,40 @@ const MainGame = () => {
                   </div>
                 </div>
                 <div className="stats-box numbers-box">
-                  <div className="stat-item"><span>Games Played</span><strong>{stats.gamesPlayed}</strong></div>
-                  <div className="stat-item"><span>Current Streak</span><strong>{stats.currentStreak}</strong></div>
-                  <div className="stat-item"><span>Longest Streak</span><strong>{stats.maxStreak}</strong></div>
-                  <div className="stat-item"><span>Win Percentage</span><strong>{winPercentage}%</strong></div>
+                  <div className="stat-item"><span>Played</span><strong>{stats.gamesPlayed}</strong></div>
+                  <div className="stat-item"><span>Streak</span><strong>{stats.currentStreak}</strong></div>
+                  <div className="stat-item"><span>Max Streak</span><strong>{stats.maxStreak}</strong></div>
+                  <div className="stat-item"><span>Win Rate</span><strong>{winPercentage}%</strong></div>
                 </div>
               </div>
             </div>
           )}
 
-          {/* HELP VIEW */}
+          {/* GUIDE ASSISTANCE VIEW */}
           {activeModal === 'help' && (
             <div className="panel-card text-panel">
               <h3>How to Play</h3>
-              <p>Guess the hidden IPL player in 7 tries.</p>
-              <p>Green = Exact match.<br/>Yellow = Partial match.<br/>Grey = No match.</p>
+              <p>Identify the secret IPL player inside 7 attempts.</p>
+              <p>Green blocks symbolize perfect profile matches. Yellow represents historic franchise alignment or adjacent tier roles. Gray elements mean no matching traits.</p>
             </div>
           )}
 
-          {/* ABOUT VIEW */}
+          {/* CREDITS ABOUT VIEW */}
           {activeModal === 'about' && (
             <div className="panel-card text-panel">
               <h3>About Stumped</h3>
-              <p>Created for IPL fans. A new player every day!</p>
+              <p>A pure, database-driven cricket challenge built explicitly for passionate IPL fans everywhere.</p>
             </div>
           )}
         </div>
 
-        {/* --- MAIN INTERFACE --- */}
+        {/* --- INPUT BAR INTERACTION VIEW --- */}
         <div className="search-area">
           <div className="search-container-hook" style={{ flex: 1 }}>
             <SearchBar onGuessSubmit={handleGuessSubmit} gameStatus={gameStatus} guessedPlayers={guesses} />
           </div>
-          
           <button 
-            className="game-btn silhouette-btn"
+            className="game-btn silhouette-btn" 
             onClick={() => toggleModal('silhouette')}
             style={{ backgroundColor: activeModal === 'silhouette' ? '#e5e7eb' : 'white' }}
           >
@@ -266,10 +385,10 @@ const MainGame = () => {
                 : (activeModal === 'silhouette' ? "Hide Silhouette" : "Show Silhouette")}
             </span>
           </button>
-          
           <div className="timer-display">{formatTime(seconds)}</div>
         </div>
 
+        {/* --- RESULTS GRID DISPLAY MATRIX --- */}
         <div className="table-responsive" style={{ marginTop: '25px' }}>
           <table className="game-grid-table">
             <thead>
