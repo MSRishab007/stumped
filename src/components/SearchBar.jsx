@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import playersData from '../data/players.json';
 
 // --- CLEAN LEVENSHTEIN DISTANCE ALGORITHM ---
@@ -19,39 +19,51 @@ const getEditDistance = (str1, str2) => {
   return track[str2.length][str1.length];
 };
 
-export default function SearchBar({ onGuessSubmit, gameStatus }) {
+export default function SearchBar({ onGuessSubmit, gameStatus, guessedPlayers = [] }) {
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState([]);
+  const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
+  const dropdownRef = useRef(null);
+
+  // Reset index whenever suggestions change
+  useEffect(() => {
+    setActiveSuggestionIndex(-1);
+  }, [suggestions]);
+
+  // Scroll active item into view if it goes past dropdown bounds
+  useEffect(() => {
+    if (activeSuggestionIndex >= 0 && dropdownRef.current) {
+      const activeEl = dropdownRef.current.children[activeSuggestionIndex];
+      if (activeEl) {
+        activeEl.scrollIntoView({ block: 'nearest' });
+      }
+    }
+  }, [activeSuggestionIndex]);
 
   const handleInputChange = (e) => {
     const value = e.target.value;
     setQuery(value);
-
-    if (!playersData || playersData.length === 0) {
-      console.warn("Search bar warning: players.json pool is empty!");
-      return;
-    }
-
     const cleanValue = value.toLowerCase().trim();
-if (cleanValue.length > 0) {
+
+    if (cleanValue.length > 0) {
       const scoredPlayers = [];
+      const guessedIds = new Set(guessedPlayers.map(p => String(p.id)));
 
       playersData.forEach(player => {
-        const playerName = player.name.toLowerCase();
-        
-        let matchType = 4; // 1 = Name Prefix, 2 = Name Substring, 3 = Fuzzy Name, 4 = Keywords, 5 = No Match
+        if (guessedIds.has(String(player.id))) {
+          return; 
+        }
 
-        // --- TIER 1a: NAME PREFIX MATCH ---
+        const playerName = player.name.toLowerCase();
+        let matchType = 5; 
+
         if (playerName.startsWith(cleanValue)) {
           matchType = 1;
-        } 
-        // --- TIER 1b: NAME SUBSTRING MATCH ---
-        else if (playerName.includes(cleanValue)) {
+        } else if (playerName.includes(cleanValue)) {
           matchType = 2;
         }
         
-        // --- TIER 2: FUZZY DISTANCE NAME MATCHES ---
-        if (matchType === 4) {
+        if (matchType === 5) {
           const distance = getEditDistance(cleanValue, playerName);
           const maxAllowedDistance = cleanValue.length > 5 ? 3 : 2;
           if (distance <= maxAllowedDistance) {
@@ -59,8 +71,7 @@ if (cleanValue.length > 0) {
           }
         }
 
-        // --- TIER 3: KEYWORDS / NICKNAMES ---
-        if (matchType === 4 && Array.isArray(player.searchTerms)) {
+        if (matchType === 5 && Array.isArray(player.searchTerms)) {
           const keywordMatch = player.searchTerms.some(term => 
             term.toLowerCase().startsWith(cleanValue) || term.toLowerCase().includes(cleanValue)
           );
@@ -69,7 +80,6 @@ if (cleanValue.length > 0) {
           }
         }
 
-        // If a valid match occurred, push it to our sorting matrix
         if (matchType < 5) {
           scoredPlayers.push({
             player,
@@ -79,20 +89,40 @@ if (cleanValue.length > 0) {
         }
       });
 
-      // --- ULTIMATE SEARCH SORTING PIPELINE ---
       scoredPlayers.sort((a, b) => {
-        // 1. Sort strictly by Tier Category (Prefix > Substring > Fuzzy > Keywords)
         if (a.matchType !== b.matchType) {
           return a.matchType - b.matchType;
         }
-        
-        // 2. If they land in the same tier, popularity takes absolute priority
         return b.matchesPlayed - a.matchesPlayed;
       });
 
       const finalSuggestions = scoredPlayers.map(item => item.player).slice(0, 5);
       setSuggestions(finalSuggestions);
     } else {
+      setSuggestions([]);
+    }
+  };
+
+  // --- KEYBOARD ARROW & ENTER INTERCEPT HANDLER ---
+  const handleKeyDown = (e) => {
+    if (suggestions.length === 0) return;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault(); // Prevents cursor from leaping around text input
+      setActiveSuggestionIndex((prevIndex) => 
+        prevIndex === suggestions.length - 1 ? 0 : prevIndex + 1
+      );
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setActiveSuggestionIndex((prevIndex) => 
+        prevIndex <= 0 ? suggestions.length - 1 : prevIndex - 1
+      );
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (activeSuggestionIndex >= 0 && activeSuggestionIndex < suggestions.length) {
+        handleSelectPlayer(suggestions[activeSuggestionIndex]);
+      }
+    } else if (e.key === 'Escape') {
       setSuggestions([]);
     }
   };
@@ -109,6 +139,7 @@ if (cleanValue.length > 0) {
         type="text"
         value={query}
         onChange={handleInputChange}
+        onKeyDown={handleKeyDown}
         disabled={gameStatus !== 'playing'}
         placeholder={gameStatus === 'playing' ? "Type 'gaikwad', 'dhoni', 'brevis'..." : "Game Over!"}
         style={{
@@ -125,50 +156,51 @@ if (cleanValue.length > 0) {
       
       {/* Suggestions Dropdown */}
       {suggestions.length > 0 && (
-        <ul style={{
-          position: 'absolute',
-          top: '100%',
-          left: 0,
-          right: 0,
-          backgroundColor: '#fff',
-          border: '2px solid #000',
-          borderRadius: '4px',
-          listStyle: 'none',
-          padding: 0,
-          margin: '5px 0 0 0',
-          zIndex: 999,
-          textAlign: 'left',
-          boxShadow: '0 4px 10px rgba(0,0,0,0.15)',
-          maxHeight: '300px',
-          overflowY: 'auto'
-        }}>
-          {suggestions.map(player => (
-            <li
-              key={player.id}
-              onClick={() => handleSelectPlayer(player)}
-              style={{
-                padding: '12px 15px',
-                cursor: 'pointer',
-                borderBottom: '1px solid #eee',
-                fontSize: '1rem',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f5f5f5'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#fff'}
-            >
-              <div>
-                <strong>{player.name}</strong>
-                <span style={{ color: '#666', fontSize: '0.85rem', marginLeft: '8px' }}>
-                  ({player.currentFranchise})
-                </span>
-              </div>
-              <span style={{ color: '#aaa', fontSize: '0.8rem' }}>
-                {player.matches} matches
-              </span>
-            </li>
-          ))}
+        <ul 
+          ref={dropdownRef}
+          style={{
+            position: 'absolute',
+            top: '100%',
+            left: 0,
+            right: 0,
+            backgroundColor: '#fff',
+            border: '2px solid #000',
+            borderRadius: '4px',
+            listStyle: 'none',
+            padding: 0,
+            margin: '5px 0 0 0',
+            zIndex: 999,
+            textAlign: 'left',
+            boxShadow: '0 4px 10px rgba(0,0,0,0.15)',
+            maxHeight: '300px',
+            overflowY: 'auto'
+          }}
+        >
+          {suggestions.map((player, idx) => {
+            const isHighlighted = idx === activeSuggestionIndex;
+            return (
+              <li
+                key={player.id}
+                onClick={() => handleSelectPlayer(player)}
+                onMouseEnter={() => setActiveSuggestionIndex(idx)}
+                style={{
+                  padding: '12px 15px',
+                  cursor: 'pointer',
+                  borderBottom: '1px solid #eee',
+                  fontSize: '1rem',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  // Highlight logic merges keyboard focus and mouse hover styles flawlessly
+                  backgroundColor: isHighlighted ? '#e5e7eb' : '#fff' 
+                }}
+              >
+                <div>
+                  <strong>{player.name}</strong>
+                </div>
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>

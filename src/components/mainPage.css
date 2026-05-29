@@ -131,3 +131,283 @@
   color: #991b1b;
   border: 1px solid #f87171;
 }
+/* --- Silhouette & Target Image System --- */
+./* --- Silhouette & Target Image System --- */
+.target-image-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.target-image-container img {
+  height: 120px;
+  /* If you want the original image proportions, you can remove width, 
+     but keeping it 120px gives a uniform square */
+  width: 120px; 
+  object-fit: contain; /* ensures the whole player fits in the square */
+  
+  /* Removed the 50% border-radius to keep it a full square */
+  border-radius: 4px; /* Just a tiny softening of the sharp corners, or set to 0 for strict square */
+  
+  background-color: transparent; /* Ensures only the player turns black, not the box */
+  border: 2px solid #ccc;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  transition: filter 0.6s ease-in-out, border-color 0.6s ease;
+}
+
+/* Turns ONLY the player completely black */
+.image-hidden {
+  filter: brightness(0); /* Pure black */
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Returns the image to full color upon winning/losing */
+.image-revealed {
+  filter: none;
+  background-color: #f3f4f6; /* Optional: adds a nice subtle backdrop once revealed */
+  border-color: #DAAE4F; /* Lights up gold on reveal */
+}
+
+/* Gray out the button once the silhouette is activated */
+.btn-disabled {
+  background-color: #f3f4f6;
+  border-color: #e5e7eb;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+/* --- DISPLAY PANEL (Shared Space for Image, Stats, Info) --- */
+.display-panel-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+  min-height: 20px; /* Prevents layout jumping when empty */
+}
+
+.panel-card {
+  background: #fff;
+  border: 3px solid #000;
+  border-radius: 4px;
+  padding: 15px;
+  width: 100%;
+  max-width: 800px;
+  box-shadow: 4px 4px 0px rgba(0,0,0,0.1);
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- IMAGE STYLES (Fixed Square) --- */
+.image-panel {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.image-panel img {
+  height: 150px;
+  width: 150px;
+  object-fit: contain; 
+  border-radius: 4px; 
+  background-color: transparent; 
+  border: 2px solid #ccc;
+  transition: filter 0.6s ease-in-out, border-color 0.6s ease;
+}
+
+.image-hidden {
+  filter: brightness(0);
+  pointer-events: none;
+  user-select: none;
+}
+
+.image-revealed {
+  filter: none;
+  background-color: #f3f4f6;
+  border-color: #DAAE4F;
+}
+
+/* --- STATS PANEL (Poeltl Style) --- */
+.stats-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px dashed #ccc;
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+}
+
+.stats-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  text-transform: uppercase;
+}
+
+.close-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: white;
+  border: 2px solid #000;
+  font-weight: bold;
+  padding: 4px 8px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.stats-content {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.stats-box {
+  border: 2px solid #000;
+  padding: 15px;
+  flex: 1;
+  min-width: 250px;
+}
+
+.stats-box h4 {
+  margin-top: 0;
+  text-align: center;
+  border-bottom: 1px dashed #999;
+  padding-bottom: 10px;
+}
+
+.numbers-box {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  text-align: center;
+}
+
+.stat-item span {
+  display: block;
+  font-size: 0.8rem;
+  color: #666;
+  text-transform: uppercase;
+}
+
+.stat-item strong {
+  display: block;
+  font-size: 1.8rem;
+  margin-top: 5px;
+}
+
+/* Bar Chart */
+.chart-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  height: 120px;
+  padding-top: 20px;
+}
+
+.chart-bar-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  height: 100%;
+  flex: 1;
+}
+
+.chart-bar {
+  width: 20px;
+  background-color: #84cc16; /* Bright Green */
+  border: 1px solid #000;
+  border-bottom: none;
+  position: relative;
+  min-height: 2px; /* Ensure 0s still show a flat line */
+}
+
+.bar-label {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-weight: bold;
+  font-size: 0.85rem;
+}
+
+.chart-axis {
+  margin-top: 5px;
+  font-weight: bold;
+  border-top: 2px solid #000;
+  width: 100%;
+  text-align: center;
+  padding-top: 5px;
+}
+
+/* Info Panels */
+.text-panel h3 { margin-top: 0; }
+/* --- TRANSPARENT SILHOUETTE PANEL --- */
+.transparent-panel {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  animation: slideDown 0.2s ease-out;
+  padding: 10px 0;
+}
+
+/* --- POST-GAME PLAYER REVEAL CARD --- */
+.player-reveal-card {
+  display: flex;
+  gap: 25px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap; /* Allows stacking on small mobile screens */
+}
+
+.reveal-image-container img {
+  height: 160px;
+  width: 160px;
+  object-fit: contain;
+  border-radius: 4px;
+  background-color: #f3f4f6;
+  border: 3px solid #DAAE4F;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.reveal-stats-container {
+  flex: 1;
+  min-width: 280px;
+}
+
+.reveal-stats-container h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 1.6rem;
+  border-bottom: 2px solid #ccc;
+  padding-bottom: 8px;
+  text-transform: uppercase;
+  color: #111;
+}
+
+.reveal-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+  gap: 12px 15px;
+}
+
+.reveal-stats-grid div span {
+  display: block;
+  font-size: 0.75rem;
+  color: #666;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.reveal-stats-grid div strong {
+  display: block;
+  font-size: 1.1rem;
+  color: #000;
+}
