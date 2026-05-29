@@ -1,58 +1,91 @@
-//For Role Comparison Logic
 const ROLE_PROXIMITY = {
-  'Top Order Batter': ['Middle Order Batter', 'Wicketkeeper Batter', 'Batting Allrounder'],
-  'Middle Order Batter': ['Top Order Batter', 'Wicketkeeper Batter', 'Batting Allrounder'],
-  'Wicketkeeper Batter': ['Top Order Batter', 'Middle Order Batter'],
-  'Batting Allrounder': ['Top Order Batter', 'Middle Order Batter', 'Bowling Allrounder'],
-  'Bowling Allrounder': ['Batting Allrounder', 'Spin Bowler', 'Pace Bowler'],
-  'Spin Bowler': ['Bowling Allrounder', 'Pace Bowler'],
-  'Pace Bowler': ['Bowling Allrounder', 'Spin Bowler']
+  'top order batter': ['middle order batter', 'wicketkeeper batter', 'batting allrounder'],
+  'middle order batter': ['top order batter', 'wicketkeeper batter', 'batting allrounder'],
+  'wicketkeeper batter': ['top order batter', 'middle order batter'],
+  'batting allrounder': ['top order batter', 'middle order batter', 'bowling allrounder'],
+  'bowling allrounder': ['batting allrounder', 'spin bowler', 'pace bowler'],
+  'spin bowler': ['bowling allrounder', 'pace bowler'],
+  'pace bowler': ['bowling allrounder', 'spin bowler']
 };
 
-//Helper function to compare numeric attributes with tolerance
-function compareNumeric(guess, target, tolerance) {
-  if (guess === target) {
-    return { match: 'exact', direction: null };
+// Helper: Calculate age from "DD-MM-YYYY"
+const calculateAge = (dobString) => {
+  if (!dobString || dobString === "Unknown") return NaN;
+  const [day, month, year] = dobString.split('-');
+  const birthDate = new Date(year, month - 1, day);
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const m = today.getMonth() - birthDate.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
   }
-  
-  const difference = Math.abs(guess - target);
-  const matchStatus = difference <= tolerance ? 'partial' : 'none';
-  const direction = target > guess ? 'higher' : 'lower';
-  
-  return { match: matchStatus, direction };
-}
+  return age;
+};
 
-// Main comparison function
-export function comparePlayers(guessedPlayer, targetPlayer) {
-  // Check if player has historically worn a jersey matching the target's current active club
-  const teamMatch = guessedPlayer.currentTeam === targetPlayer.currentTeam;
-  const teamPartial = !teamMatch && targetPlayer.pastTeams.includes(guessedPlayer.currentTeam);
-
-  let teamStatus = 'none';
-  if (teamMatch) teamStatus = 'exact';
-  else if (teamPartial) teamStatus = 'partial';
-
-  // Evaluate role logic mapping
-  let roleStatus = 'none';
-  if (guessedPlayer.role === targetPlayer.role) {
-    roleStatus = 'exact';
-  } else if ((ROLE_PROXIMITY[targetPlayer.role] || []).includes(guessedPlayer.role)) {
-    roleStatus = 'partial';
+// Helper: Evaluate numeric stats
+const compareNumeric = (guessVal, targetVal, threshold) => {
+  // Handle non-numeric edge cases (e.g., "Retained", "Unknown")
+  if (isNaN(guessVal) || isNaN(targetVal)) {
+    return {
+      status: String(guessVal).toLowerCase() === String(targetVal).toLowerCase() ? 'exact' : 'wrong',
+      direction: 'none'
+    };
   }
 
-  return {
-    isCorrect: guessedPlayer.id === targetPlayer.id,
-    results: {
-      team: { match: teamStatus },
-      role: { match: roleStatus },
-      battingHand: {
-        match: guessedPlayer.battingHand === targetPlayer.battingHand ? 'exact' : 'none'
-      },
-      // Appending core numeric tolerances (+-2 years, +-10 matches, +-500 runs, +-50 wickets)
-      debutYear: compareNumeric(guessedPlayer.debutYear, targetPlayer.debutYear, 2),
-      matches: compareNumeric(guessedPlayer.matches, targetPlayer.matches, 10),
-      runs: compareNumeric(guessedPlayer.runs, targetPlayer.runs, 500),
-      wickets: compareNumeric(guessedPlayer.wickets, targetPlayer.wickets, 50)
-    }
+  const g = Number(guessVal);
+  const t = Number(targetVal);
+  
+  let status = 'wrong';
+  if (g === t) status = 'exact';
+  else if (Math.abs(g - t) <= threshold) status = 'partial';
+
+  let direction = 'none';
+  if (t > g) direction = 'up';   // Target is higher
+  else if (t < g) direction = 'down'; // Target is lower
+
+  return { status, direction };
+};
+
+// Helper: Clean roles to match proximity dictionary (e.g. "Top-Order Batter" -> "top order batter")
+const cleanRole = (role) => role ? role.replace(/-/g, ' ').toLowerCase() : '';
+
+export function getGuessResult(guess, target) {
+  const result = {
+    isExactMatch: guess.id === target.id,
+    team: { status: 'wrong' },
+    role: { status: 'wrong' },
+    battingHand: { status: guess.battingHand === target.battingHand ? 'exact' : 'wrong' },
+    matches: compareNumeric(guess.matches, target.matches, 10),
+    runs: compareNumeric(guess.runs, target.runs, 100),
+    strikeRate: compareNumeric(guess.strikeRate, target.strikeRate, 5),
+    wickets: compareNumeric(guess.wickets, target.wickets, 5),
+    economy: compareNumeric(guess.economy, target.economy, 0.5),
+    debutYear: compareNumeric(guess.debutYear, target.debutYear, 2),
+    auctionPrice: compareNumeric(guess.auctionPrice, target.auctionPrice, 100),
+    age: compareNumeric(calculateAge(guess.dob), calculateAge(target.dob), 2),
   };
+
+  // --- TEAM LOGIC ---
+  const guessTeams = [guess.currentFranchise, ...(guess.pastTeams || [])];
+  const targetTeams = [target.currentFranchise, ...(target.pastTeams || [])];
+
+  if (guess.currentFranchise === target.currentFranchise) {
+    result.team.status = 'exact';
+  } else {
+    // If they share any team in their history
+    const hasOverlap = guessTeams.some(team => targetTeams.includes(team));
+    if (hasOverlap) result.team.status = 'partial';
+  }
+
+  // --- ROLE LOGIC ---
+  const gRole = cleanRole(guess.role);
+  const tRole = cleanRole(target.role);
+
+  if (gRole === tRole) {
+    result.role.status = 'exact';
+  } else if (ROLE_PROXIMITY[gRole] && ROLE_PROXIMITY[gRole].includes(tRole)) {
+    result.role.status = 'partial';
+  }
+
+  return result;
 }
