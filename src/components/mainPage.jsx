@@ -52,6 +52,7 @@ const MainGame = () => {
     const savedTime = localStorage.getItem(`stumped_timer_${activeDate}`);
     return savedTime ? parseInt(savedTime, 10) : 0;
   });
+  const [countdown, setCountdown] = useState('');
 
   const { guesses, status: gameStatus, usedSilhouette } = gameState;
 
@@ -83,6 +84,28 @@ const MainGame = () => {
     }, 1000);
     return () => clearInterval(interval);
   }, [gameStatus, activeDate]);
+  useEffect(() => {
+    if (gameStatus === 'playing') return;
+
+    const updateCountdown = () => {
+      const now = new Date();
+      const midnight = new Date();
+      midnight.setHours(24, 0, 0, 0); // Sets time to exactly 00:00:00 of the next day
+      
+      const diffMs = midnight - now;
+      
+      const h = Math.floor(diffMs / (1000 * 60 * 60)).toString().padStart(2, '0');
+      const m = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
+      const s = Math.floor((diffMs % (1000 * 60)) / 1000).toString().padStart(2, '0');
+      
+      setCountdown(`${h}:${m}:${s}`);
+    };
+
+    updateCountdown(); // Call immediately so it doesn't wait 1 second to appear
+    const interval = setInterval(updateCountdown, 1000);
+    
+    return () => clearInterval(interval);
+  }, [gameStatus]);
 
   const toggleModal = (modalName) => {
     if (activeModal === modalName) {
@@ -438,7 +461,17 @@ const handleGuessSubmit = (chosenPlayer) => {
                 : (activeModal === 'silhouette' ? "Hide Silhouette" : "Show Silhouette")}
             </span>
           </button>
-          <div className="timer-display">{formatTime(seconds)}</div>
+          {/* --- TIMER / COUNTDOWN DISPLAY --- */}
+          <div className="timer-display">
+            {gameStatus === 'playing' ? (
+              <span className="stopwatch">{formatTime(seconds)}</span>
+            ) : (
+              <div className="countdown-container">
+                <span className="countdown-label">Next player in</span>
+                <span className="countdown-time">{countdown}</span>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* --- RESULTS GRID DISPLAY MATRIX --- */}

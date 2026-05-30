@@ -596,3 +596,34 @@
 .share-btn.copied {
   background-color: #22c55e; /* Turns green when clicked */
 }
+/* --- TIMER & COUNTDOWN --- */
+.timer-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #fff;
+  border: 3px solid #000;
+  border-radius: 4px;
+  padding: 8px 15px;
+  font-weight: bold;
+  box-shadow: 4px 4px 0px #000;
+  min-width: 110px; /* Keeps the box from jittering */
+}
+
+.countdown-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.2;
+}
+
+.countdown-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  color: #666;
+}
+
+.countdown-time {
+  font-size: 1.1rem;
+  color: #ef4444; /* Red color to make it pop */
+}
