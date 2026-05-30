@@ -101,41 +101,36 @@ const MainGame = () => {
     return Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
   };
 
-  const handleShare = () => {
+const handleShare = () => {
     const gameNum = getGameNumber(activeDate);
     const attemptCount = gameStatus === 'won' ? guesses.length : 'X';
     
     // Header
     let shareText = `Stumped #${gameNum} - ${attemptCount}/${MAX_GUESSES}\n\n`;
-    shareText += 'https://stumped-seven.vercel.app/\n';
+
     guesses.forEach(guess => {
       const result = getGuessResult(guess, targetPlayer);
       
       const getEmoji = (status) => status === 'exact' ? '🟩' : status === 'partial' ? '🟨' : '⬛';
       
-      // Use the heavy equals emoji (🟰) for exact matches to keep the grid perfectly aligned!
-      const getArrow = (dir) => dir === 'up' ? '⬆️' : dir === 'down' ? '⬇️' : '🟰';
-
       let row = '';
       
-      // Columns without arrows (1 emoji wide)
+      // Only append the color blocks, no arrows!
       row += getEmoji(result.team.status);
       row += getEmoji(result.role.status);
       row += getEmoji(result.battingHand.status);
-      
-      // Columns with arrows (2 emojis wide)
-      row += getEmoji(result.age.status) + getArrow(result.age.direction);
-      row += getEmoji(result.debutYear.status) + getArrow(result.debutYear.direction);
-      row += getEmoji(result.auctionPrice.status) + getArrow(result.auctionPrice.direction);
-      row += getEmoji(result.matches.status) + getArrow(result.matches.direction);
-      row += getEmoji(result.runs.status) + getArrow(result.runs.direction);
-      row += getEmoji(result.wickets.status) + getArrow(result.wickets.direction);
+      row += getEmoji(result.age.status);
+      row += getEmoji(result.debutYear.status);
+      row += getEmoji(result.auctionPrice.status);
+      row += getEmoji(result.matches.status);
+      row += getEmoji(result.runs.status);
+      row += getEmoji(result.wickets.status);
 
       shareText += row + '\n';
     });
 
     // Append Site URL
-    // shareText += '\nhttps://stumped-seven.vercel.app/';
+    shareText += '\nhttps://stumped-seven.vercel.app/';
 
     // Write to clipboard API
     navigator.clipboard.writeText(shareText).then(() => {
