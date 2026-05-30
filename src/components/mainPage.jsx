@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { HelpCircle, BarChart2, Info, History, User, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { HelpCircle, BarChart2, Info, History, User, X, ChevronLeft, ChevronRight,Share } from 'lucide-react';
 import SearchBar from './SearchBar'; 
 import { getDailyPlayerForDate } from '../utils/dailyPlayer';
 import { getGuessResult } from '../utils/gameLogic';
+// import { HelpCircle, BarChart2, Info, History, User, X, ChevronLeft, ChevronRight, Share } from 'lucide-react';
 import './mainPage.css';
 
 const getTodayStr = () => {
@@ -24,6 +25,7 @@ const DEFAULT_STATS = {
 const MainGame = () => {
   const MAX_GUESSES = 7;
   const realTodayStr = getTodayStr();
+  const [copySuccess, setCopySuccess] = useState(false);
 
   // --- TIME MACHINE STATES ---
   const [activeDate, setActiveDate] = useState(realTodayStr);
@@ -92,7 +94,57 @@ const MainGame = () => {
       }
     }
   };
+// --- SHARE TO CLIPBOARD LOGIC ---
+  const getGameNumber = (dateStr) => {
+    // Calculates how many days have passed since launch
+    const diffTime = new Date(dateStr) - LAUNCH_DATE;
+    return Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+  };
 
+  const handleShare = () => {
+    const gameNum = getGameNumber(activeDate);
+    const attemptCount = gameStatus === 'won' ? guesses.length : 'X';
+    
+    // Header
+    let shareText = `Stumped #${gameNum} - ${attemptCount}/${MAX_GUESSES}\n\n`;
+    shareText += 'https://stumped-seven.vercel.app/\n';
+    guesses.forEach(guess => {
+      const result = getGuessResult(guess, targetPlayer);
+      
+      const getEmoji = (status) => status === 'exact' ? '🟩' : status === 'partial' ? '🟨' : '⬛';
+      
+      // Use the heavy equals emoji (🟰) for exact matches to keep the grid perfectly aligned!
+      const getArrow = (dir) => dir === 'up' ? '⬆️' : dir === 'down' ? '⬇️' : '🟰';
+
+      let row = '';
+      
+      // Columns without arrows (1 emoji wide)
+      row += getEmoji(result.team.status);
+      row += getEmoji(result.role.status);
+      row += getEmoji(result.battingHand.status);
+      
+      // Columns with arrows (2 emojis wide)
+      row += getEmoji(result.age.status) + getArrow(result.age.direction);
+      row += getEmoji(result.debutYear.status) + getArrow(result.debutYear.direction);
+      row += getEmoji(result.auctionPrice.status) + getArrow(result.auctionPrice.direction);
+      row += getEmoji(result.matches.status) + getArrow(result.matches.direction);
+      row += getEmoji(result.runs.status) + getArrow(result.runs.direction);
+      row += getEmoji(result.wickets.status) + getArrow(result.wickets.direction);
+
+      shareText += row + '\n';
+    });
+
+    // Append Site URL
+    // shareText += '\nhttps://stumped-seven.vercel.app/';
+
+    // Write to clipboard API
+    navigator.clipboard.writeText(shareText).then(() => {
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000);
+    }).catch(err => {
+      console.error("Failed to copy text: ", err);
+    });
+  };
   // --- GAME CONCLUSION & ACCUMULATION ENGINE ---
 const handleGuessSubmit = (chosenPlayer) => {
     // Prevent duplicate guesses or submission if game already ended
@@ -114,10 +166,7 @@ const handleGuessSubmit = (chosenPlayer) => {
     // This executes for both 'Today' and 'Flashback' games so progress persists per day
     setGameState(prev => ({ ...prev, guesses: updatedGuesses, status: newStatus }));
 
-    // --- IMPLEMENT PRACTICE MODE LOGIC ---
-    // Per previous agreement, Flashback games are 'Practice Mode'.
-    // If this is a past game, stop here. Do not update aggregate lifetime stats, 
-    // streaks, or the history ledger used for coloring the calendar.
+    // --- IMPLEMENT PRACTICE MODE LOGIC ---.
     if (activeDate !== realTodayStr) return;
 
     // --- UPDATE GLOBAL STATS (Only for Today's Live Game) ---
@@ -286,7 +335,7 @@ const handleGuessSubmit = (chosenPlayer) => {
             </div>
           )}
 
-          {/* SILHOUETTE & FINAL POST-GAME REVEAL METRIC CARD */}
+         {/* SILHOUETTE & FINAL POST-GAME REVEAL METRIC CARD */}
           {activeModal === 'silhouette' && targetPlayer?.imageLink && (
             gameStatus === 'playing' ? (
               <div className="transparent-panel image-panel">
@@ -309,11 +358,20 @@ const handleGuessSubmit = (chosenPlayer) => {
                     <div><span>Wickets</span><strong>{targetPlayer.wickets}</strong></div>
                     <div><span>Price</span><strong>{targetPlayer.auctionPrice} L</strong></div>
                   </div>
+                  
+                  {/* --- NEW SHARE BUTTON --- */}
+                  <button 
+                    className={`share-btn ${copySuccess ? 'copied' : ''}`} 
+                    onClick={handleShare}
+                  >
+                    <Share size={18} />
+                    <span>{copySuccess ? 'Copied to Clipboard!' : 'Share Results'}</span>
+                  </button>
+
                 </div>
               </div>
             )
           )}
-
           {/* LCG LIFETIME GLOBAL STATISTICS */}
           {activeModal === 'stats' && (
             <div className="panel-card stats-panel">
