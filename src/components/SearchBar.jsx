@@ -135,24 +135,18 @@ export default function SearchBar({ onGuessSubmit, gameStatus, guessedPlayers = 
 
   return (
     <div style={{ position: 'relative', maxWidth: '400px', margin: '20px auto', fontFamily: 'sans-serif' }}>
-      <input
-        type="text"
-        value={query}
-        onChange={handleInputChange}
-        onKeyDown={handleKeyDown}
-        disabled={gameStatus !== 'playing'}
-        placeholder={gameStatus === 'playing' ? "Type 'gaikwad', 'dhoni', 'brevis'..." : "Game Over!"}
-        style={{
-          width: '100%',
-          padding: '12px',
-          fontSize: '1.1rem',
-          border: '2px solid #000',
-          borderRadius: '4px',
-          outline: 'none',
-          boxSizing: 'border-box',
-          backgroundColor: gameStatus !== 'playing' ? '#f0f0f0' : '#fff'
-        }}
-      />
+      <div className="search-input-wrapper">
+        <div className="search-icon-block">?</div>
+        <input
+          type="text"
+          value={query}
+          onChange={handleInputChange}
+          onKeyDown={handleKeyDown}
+          disabled={gameStatus !== 'playing'}
+          placeholder={gameStatus === 'playing' ? "Guess a player..." : "Game Over!"}
+          className="poeltl-input"
+        />
+      </div>
       
       {/* Suggestions Dropdown */}
       {suggestions.length > 0 && (
