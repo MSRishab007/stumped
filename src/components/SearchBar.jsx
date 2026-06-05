@@ -134,21 +134,28 @@ export default function SearchBar({ onGuessSubmit, gameStatus, guessedPlayers = 
   };
 
   return (
-    <div style={{ position: 'relative', maxWidth: '400px', margin: '20px auto', fontFamily: 'sans-serif' }}>
-      <div className="search-input-wrapper">
-        <div className="search-icon-block">?</div>
+    // Changed to flexGrow: 1 so it fills the left side of the row perfectly
+    <div style={{ position: 'relative', flexGrow: 1, width: '100%', fontFamily: 'var(--heading2), sans-serif' }}>
+      
+      {/* THE NEW POELTL INPUT WRAPPER */}
+      <div className="input-wrapper hoverable-menu search-input-wrapper">
+        <label htmlFor="player-name-input" className="question-mark">?</label>
+        <label htmlFor="player-name-input" className="sr-only" style={{ display: 'none' }}>Enter a player's name to guess:</label>
+        
         <input
-          type="text"
+          id="player-name-input"
+          type="search"
+          role="search"
+          autoComplete="off"
           value={query}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           disabled={gameStatus !== 'playing'}
           placeholder={gameStatus === 'playing' ? "Guess a player..." : "Game Over!"}
-          className="poeltl-input"
         />
       </div>
       
-      {/* Suggestions Dropdown */}
+      {/* Suggestions Dropdown (Logic remains completely unchanged) */}
       {suggestions.length > 0 && (
         <ul 
           ref={dropdownRef}
@@ -157,15 +164,14 @@ export default function SearchBar({ onGuessSubmit, gameStatus, guessedPlayers = 
             top: '100%',
             left: 0,
             right: 0,
-            backgroundColor: '#fff',
-            border: '2px solid #000',
-            borderRadius: '4px',
+            backgroundColor: 'var(--white)',
+            border: '3px solid var(--dark)',
+            boxShadow: '3px 3px 0px var(--dark)',
             listStyle: 'none',
             padding: 0,
             margin: '5px 0 0 0',
             zIndex: 999,
             textAlign: 'left',
-            boxShadow: '0 4px 10px rgba(0,0,0,0.15)',
             maxHeight: '300px',
             overflowY: 'auto'
           }}
@@ -180,13 +186,14 @@ export default function SearchBar({ onGuessSubmit, gameStatus, guessedPlayers = 
                 style={{
                   padding: '12px 15px',
                   cursor: 'pointer',
-                  borderBottom: '1px solid #eee',
-                  fontSize: '1rem',
+                  borderBottom: '2px solid var(--dark)',
+                  fontSize: '1.2rem',
+                  fontFamily: 'sans-serif',
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  // Highlight logic merges keyboard focus and mouse hover styles flawlessly
-                  backgroundColor: isHighlighted ? '#e5e7eb' : '#fff' 
+                  backgroundColor: isHighlighted ? 'var(--biege)' : 'var(--white)',
+                  color: 'var(--dark)'
                 }}
               >
                 <div>

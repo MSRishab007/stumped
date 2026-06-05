@@ -22,13 +22,25 @@ const DEFAULT_STATS = {
   distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0 },
   history: {} // Records: { "YYYY-MM-DD": { status: "won" | "lost", guesses: X, time: Y } }
 };
-const SilhouetteIcon = () => (
-  <svg className="silhouette" viewBox="0 0 34.93 41.1" style={{ height: '24px', marginRight: '5px' }}>
-    <path fill="var(--orange)" d="m31.75,36.34c0,.15-.1.28-.25.31-9.28,1.67-18.79,1.67-28.08,0-.15-.03-.26-.17-.26-.31.01-7.02,5.7-12.7,12.7-12.7h3.17c3.51,0,6.68,1.42,8.98,3.72s3.72,5.47,3.72,8.98ZM17.47,3.17c-4.38,0-7.95,3.55-7.95,7.94s3.57,7.95,7.95,7.95,7.94-3.57,7.94-7.95c-.01-4.37-3.57-7.93-7.94-7.94Z" />
+const SilhouetteIcon = ({ active }) => (
+  <svg className="silhouette" viewBox="0 0 34.93 41.1" style={{ height: '40px', marginRight: '8px', marginTop: '-2px' }}>
+    <path fill={active ? "var(--white)" : "var(--orange)"} d="m31.75,36.34c0,.15-.1.28-.25.31-9.28,1.67-18.79,1.67-28.08,0-.15-.03-.26-.17-.26-.31.01-7.02,5.7-12.7,12.7-12.7h3.17c3.51,0,6.68,1.42,8.98,3.72s3.72,5.47,3.72,8.98ZM17.47,3.17c-4.38,0-7.95,3.55-7.95,7.94s3.57,7.95,7.95,7.95,7.94-3.57,7.94-7.95c-.01-4.37-3.57-7.93-7.94-7.94Z" />
     <path fill="var(--dark)" d="m34.93,36.34c.01,1.68-1.19,3.13-2.86,3.44-4.81.87-9.7,1.31-14.6,1.31s-9.79-.44-14.6-1.31C1.2,39.48-.01,38.03,0,36.34,0,28.84,5.21,22.57,12.2,20.9c-3.49-1.87-5.85-5.55-5.85-9.79C6.35,4.98,11.33,0,17.47,0s11.11,4.98,11.11,11.11c-.01,4.24-2.38,7.92-5.85,9.79,6.99,1.67,12.2,7.94,12.2,15.44Zm-3.42.31c.15-.03.25-.17.25-.31,0-3.51-1.42-6.68-3.72-8.98s-5.47-3.72-8.98-3.72h-3.17c-7.01,0-12.69,5.68-12.7,12.7,0,.15.11.28.26.31,9.28,1.67,18.79,1.67,28.08,0Zm-14.04-17.59c4.38,0,7.94-3.57,7.94-7.95-.01-4.37-3.57-7.93-7.94-7.94-4.38,0-7.95,3.55-7.95,7.94s3.57,7.95,7.95,7.95Z" />
   </svg>
 );
-
+const ResultIcon = ({ status }) => {
+  if (status === 'exact') return (
+    <svg className="check" viewBox="0 0 33 31" style={{ width: '20px', marginLeft: '5px' }}>
+      <path fill="var(--equal)" d="m0,0v31h33V0H0Zm13.76,25.54l-9.21-7.81,2.59-3.05,6.11,5.18,12.47-15.26,3.1,2.53-15.05,18.41Z" />
+    </svg>
+  );
+  if (status === 'partial') return (
+    <svg className="close" viewBox="0 0 33 31" style={{ width: '20px', marginLeft: '5px' }}>
+      <path fill="var(--close)" d="m0,0v31h33V0H0Zm21.15,20.01c-4.54,0-6.64-4.8-9.37-4.8-1.86,0-3.06,1.72-3.15,4.38h-3.82c.14-6.26,2.87-9.28,6.69-9.28,4.64,0,6.69,4.85,9.37,4.85,1.91,0,3.11-1.77,3.2-4.43h3.78c-.1,6.31-2.82,9.28-6.69,9.28Z" />
+    </svg>
+  );
+  return null;
+};
 const HelpIcon = ({ active }) => (
   <svg viewBox="0 0 25.89 51.36">
     <path fill={active ? "var(--white)" : "var(--orange)"} d="m9.15,48.36v-8.11h6.48v8.11h-6.48Zm13.74-25.94v-13.48c0-1.84-.49-3.3-1.46-4.36-.96-1.05-2.62-1.58-4.93-1.58h-7.11c-2.31,0-3.97.53-4.93,1.58-.97,1.06-1.46,2.53-1.46,4.37v5.8h5.74v-4.83c0-.88.15-1.52.47-1.95.09-.12.19-.23.31-.32.4-.3.99-.45,1.79-.45h3.26c.59,0,.96.07,1.19.13.38.08.72.3.94.63.29.44.44,1.08.44,1.96v11.92c0,.68-.08,1.21-.25,1.63-.1.25-.27.48-.5.66-.39.29-.99.44-1.82.44h-5.02l.53,8.7h4.69l.21-3.48c.05-.79.7-1.41,1.5-1.41,2.33,0,3.98-.54,4.94-1.61.97-1.08,1.46-2.54,1.46-4.33Z"/>
@@ -392,8 +404,28 @@ const handleGuessSubmit = (chosenPlayer) => {
     return days;
   };
   const formatTime = (s) => new Date(s * 1000).toISOString().substr(11, 8);
-  const getBoxClass = (status) => status === 'exact' ? 'box-exact' : status === 'partial' ? 'box-partial' : 'box-wrong';
-  const renderArrow = (dir) => dir === 'up' ? ' ↑' : dir === 'down' ? ' ↓' : '';
+  const getBoxClass = (status) => {
+  if (status === 'exact') return 'equal';  
+  if (status === 'partial') return 'close';
+  return 'far';                            
+};
+  const renderArrow = (direction) => {
+  if (direction === 'up') {
+    return (
+      <svg className="arrow-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 20V4M5 11l7-7 7 7" />
+      </svg>
+    );
+  }
+  if (direction === 'down') {
+    return (
+      <svg className="arrow-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 4v16M5 13l7 7 7-7" />
+      </svg>
+    );
+  }
+  return null;
+};
   const emptyRowsCount = Math.max(0, MAX_GUESSES - guesses.length);
   const winPercentage = stats.gamesPlayed > 0 ? Math.round((stats.gamesWon / stats.gamesPlayed) * 100) : 0;
   const displayDateStr = new Date(activeDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
@@ -602,85 +634,125 @@ const handleGuessSubmit = (chosenPlayer) => {
 
       </div>
 
-        {/* --- INPUT BAR INTERACTION VIEW --- */}
-        <div className="search-area">
-          <div className="search-input-wrapper">
-            <div className="search-icon-block">?</div>
-            <SearchBar onGuessSubmit={handleGuessSubmit} gameStatus={gameStatus} guessedPlayers={guesses} />
-          </div>
+        {/* --- MAIN GAMEPLAY ROW (SEARCH, SILHOUETTE, TIMER) --- */}
+        <div className="searchbar">
           
-          <button 
-            className="silhouette-btn" 
-            onClick={() => toggleModal('silhouette')}
-            style={{ backgroundColor: activeModal === 'silhouette' ? '#e5e7eb' : 'white' }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              {/* Using your custom SVG wrapper style for the silhouette icon */}
-              <svg viewBox="0 0 24 24" height="22" style={{ marginRight: '8px' }}>
-                <path fill="#facc15" stroke="#111" strokeWidth="2" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-              </svg>
-              <span>
-                {gameStatus !== 'playing' 
-                  ? (activeModal === 'silhouette' ? "Hide Player" : "Show Player") 
-                  : (activeModal === 'silhouette' ? "Hide Silhouette" : "Show Silhouette")}
-              </span>
-            </div>
-          </button>
+          {/* 1. The Search Bar Component */}
+          <SearchBar onGuessSubmit={handleGuessSubmit} gameStatus={gameStatus} guessedPlayers={guesses} />
           
-          {/* --- TIMER / COUNTDOWN DISPLAY --- */}
-          <div className="timer-display">
-            {gameStatus === 'playing' ? (
-              <span className="stopwatch">{formatTime(seconds)}</span>
-            ) : (
-              <div className="countdown-container">
-                <span className="countdown-label" style={{ fontSize: '0.7rem', textTransform: 'uppercase', color: '#666' }}>Next in</span>
-                <span className="countdown-time">{countdown}</span>
+          {/* 2. The Right-Side Controls */}
+          <div className="time-hint-wrapper">
+            
+            <button 
+              className={`button horizontal-button game-btn ${activeModal === 'silhouette' ? 'activated' : ''}`}
+              role="button" 
+              aria-label="Show Mystery Player's Silhouette"
+              onClick={() => toggleModal('silhouette')}
+            >
+              <div className="content">
+                {/* CRITICAL: Pass the active state to the icon! */}
+                <SilhouetteIcon active={activeModal === 'silhouette'} />
+                <label>
+                  {gameStatus !== 'playing' 
+                    ? (activeModal === 'silhouette' ? "Hide Player" : "Show Player") 
+                    : (activeModal === 'silhouette' ? "Hide Silhouette" : "Show Silhouette")}
+                </label>
               </div>
-            )}
+            </button>
+
+            <div className="time" role="timer" aria-label="Game Timer">
+              {gameStatus === 'playing' ? (
+                <span>{formatTime(seconds)}</span>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: '1.2' }}>
+                  <span style={{ fontSize: '1rem', color: '#666', textTransform: 'uppercase' }}>Next in</span>
+                  <span>{countdown}</span>
+                </div>
+              )}
+            </div>
+
           </div>
         </div>
-
         {/* --- RESULTS GRID DISPLAY MATRIX --- */}
-        <div className="table-container">
-          <table className="game-grid-table">
-            <thead>
-              <tr>
-                <th>Player</th><th>Team</th><th>Role</th><th>Batting</th>
-                <th>Age</th><th>Debut</th><th>Price (L)</th>
-                <th>Matches</th><th>Runs</th><th>Wickets</th>
-              </tr>
-            </thead>
-            <tbody>
-              {guesses.map((guess) => {
-                const result = getGuessResult(guess, targetPlayer);
-                const birthYear = guess.dob ? guess.dob.split('-')[2] : 2026;
-                const evaluatedAge = 2026 - parseInt(birthYear || 2000);
+        {/* --- THE GUESSES GRID --- */}
+<div className="guesses" id="guesses" role="table" aria-rowcount="8" aria-label="Today's User Guesses">
+  
+  {/* 1. The Header Row (10 Columns) */}
+<div className="heading" role="row" aria-rowindex="1">
+  <div role="columnheader">Player</div>
+  <div role="columnheader">Team</div>
+  <div role="columnheader">Role</div>
+  <div role="columnheader">Batting</div>
+  <div role="columnheader">Age</div>
+  <div role="columnheader">Debut</div>
+  <div role="columnheader">Price (L)</div>
+  <div role="columnheader">Matches</div>
+  <div role="columnheader">Runs</div>
+  <div role="columnheader">Wickets</div>
+</div>
 
-                return (
-                  <tr key={guess.id} className="guess-row">
-                    <td className="cell-name"><strong>{guess.name}</strong></td>
-                    <td className={getBoxClass(result.team.status)}>{guess.currentFranchise}</td>
-                    <td className={getBoxClass(result.role.status)}>{guess.role}</td>
-                    <td className={getBoxClass(result.battingHand.status)}>{guess.battingHand}</td>
-                    <td className={getBoxClass(result.age.status)}>{evaluatedAge} {renderArrow(result.age.direction)}</td>
-                    <td className={getBoxClass(result.debutYear.status)}>{guess.debutYear} {renderArrow(result.debutYear.direction)}</td>
-                    <td className={getBoxClass(result.auctionPrice.status)}>{guess.auctionPrice ?? 'Null'} {renderArrow(result.auctionPrice.direction)}</td>
-                    <td className={getBoxClass(result.matches.status)}>{guess.matches} {renderArrow(result.matches.direction)}</td>
-                    <td className={getBoxClass(result.runs.status)}>{guess.runs} {renderArrow(result.runs.direction)}</td>
-                    <td className={getBoxClass(result.wickets.status)}>{guess.wickets} {renderArrow(result.wickets.direction)}</td>
-                  </tr>
-                );
-              })}
-              {[...Array(emptyRowsCount)].map((_, i) => (
-                <tr key={`empty-${i}`} className="empty-row-placeholder">
-                  <td colSpan="10">
-                    {guesses.length + i + 1}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+  {/* 2. The 7 Guess Rows */}
+{[...Array(7)].map((_, index) => {
+  const guess = guesses[index]; 
+  const isGuessed = !!guess;
+
+  let result, evaluatedAge;
+  if (isGuessed) {
+    result = getGuessResult(guess, targetPlayer);
+    const birthYear = guess.dob ? guess.dob.split('-')[2] : 2026;
+    evaluatedAge = 2026 - parseInt(birthYear || 2000);
+  }
+
+  return (
+    <div key={index} id={`guess${index}`} role="row" className={`guess ${isGuessed ? 'activated' : ''}`}>
+      <div className="guess-wrapper">
+        
+        {isGuessed ? (
+          /* --- THE PLAYED ROW --- */
+          <div className="row" aria-disabled="false">
+            <div role="cell" className="cell-name">
+              <strong>{guess.name}</strong>
+            </div>
+            
+            {/* Map the 9 data columns */}
+            {[
+              { val: guess?.currentFranchise, res: result?.team },
+              { val: guess?.role ? guess.role.replace(/Top-Order/gi, 'Top\u00A0Order').replace(/Middle-Order/gi, 'Middle\u00A0Order').replace(/Wicketkeeper/gi, 'WK').replace(/-/g, ' ') : 'Null', res: result?.role },
+              { val: guess?.battingHand, res: result?.battingHand },
+              { val: evaluatedAge, res: result?.age },
+              { val: (!guess?.debutYear || guess?.debutYear === 'Unknown') ? 'NA' : guess.debutYear, res: result?.debutYear },
+              { val: guess?.auctionPrice, res: result?.auctionPrice },
+              { val: guess?.matches, res: result?.matches },
+              { val: guess?.runs, res: result?.runs },
+              { val: guess?.wickets, res: result?.wickets }
+            ].map((item, i) => {
+              // Fetch the class ('equal', 'close', 'far')
+              const statusClass = item.res?.status ? getBoxClass(item.res.status) : '';
+              
+              return (
+                <div key={i} role="cell">
+                  {/* The inner badge contains the borders safely */}
+                  <div className={`badge ${statusClass}`}>
+                    <span>{item.val ?? 'Null'}</span>
+                    {renderArrow(item.res?.direction)}
+                    <ResultIcon status={item.res?.status} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          /* --- THE UNPLAYED COVER --- */
+          <div className="cover">
+            <span>{index + 1}</span>
+          </div>
+        )}
+        
+      </div>
+    </div>
+  );
+})}
+</div>
       </main>
     </div>
   );

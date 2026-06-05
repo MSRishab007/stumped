@@ -97,21 +97,111 @@ body #root .ipl-logo-img {
    2. HEADER & MAIN LAYOUT
    ========================================= */
 
-.game-header {
+/* =========================================
+   1. THE HEADER CONTAINER
+   ========================================= */
+body #root .game-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: center; /* Keeps the logo and buttons vertically aligned */
   width: 100%;
   padding-bottom: 20px;
-  margin-bottom: 30px;
-  border-bottom: 3px solid var(--dark);
-  /* flex-wrap: wrap; Allows stacking on tiny screens */
-  gap: 20px;
+  margin-bottom: 100px !important; /* The Poeltl vertical gap */
+  border-bottom: none !important; /* Turn off the default border */
+  position: relative; /* Anchors the custom line below */
 }
+@media (max-width: 800px) {
+  body #root .game-header {
+    /* Reduces the vertical gap after the line on small screens */
+    margin-bottom: 25px !important; 
+  }
+  
+  body #root .searchbar {
+    /* Ensures the search bar doesn't accidentally pull itself up into the header */
+    margin-top: 0 !important; 
+  }
+}
+/* =========================================
+   MOBILE RESPONSIVENESS (MAX-WIDTH: 800px)
+   ========================================= */
+@media (max-width: 800px) {
 
+  /* --- 1. SHRINK TOP MENU BUTTONS --- */
+  /* Reduces padding and scales down the icons slightly so the buttons aren't as tall */
+  body #root .header-buttons .game-btn {
+    padding: 0px 10px !important; 
+  }
+  body #root .header-buttons .game-btn .content svg {
+    min-height: 1.5rem !important;
+    max-height: 1.8rem !important;
+  }
+  body #root .header-buttons .game-btn label {
+    font-size: 1.4rem !important;
+    margin-top: 3px; 
+  }
 
+  /* --- 2. THE SEARCHBAR FLIP (SAFE ORDERING) --- */
+  body #root .searchbar {
+    /* Hard override of the desktop height to prevent upward overflow */
+    height: auto !important; 
+    min-height: 115px !important; 
+    
+    /* Standard top-to-bottom stack */
+    flex-direction: column !important; 
+    gap: 15px !important;
+    margin-top: 10px !important; 
+  }
 
+  /* --- 3. FORCE SILHOUETTE & TIMER TO THE TOP --- */
+  body #root .searchbar .time-hint-wrapper {
+    order: 1 !important; /* Draws this row FIRST */
+    width: 100% !important;
+    height: 50px !important; /* Hard height lock */
+    justify-content: space-between !important; 
+    margin: 0 !important;
+  }
 
+  /* --- 4. FORCE INPUT BAR TO THE BOTTOM --- */
+  body #root .searchbar > div:first-child {
+    order: 2 !important; /* Draws this row SECOND */
+    width: 100% !important;
+    height: 50px !important; /* Hard height lock */
+    margin: 0 !important;
+  }
+
+  /* --- 5. MOBILE ELEMENT SIZING --- */
+  body #root .searchbar .input-wrapper,
+  body #root .searchbar .horizontal-button,
+  body #root .searchbar .time {
+    height: 50px !important; 
+  }
+  
+  body #root .searchbar .input-wrapper .question-mark {
+    width: 50px !important;
+  }
+  
+  /* Keeps the '?' square */
+  body #root .searchbar .input-wrapper .question-mark {
+    width: 50px !important;
+  }
+}
+/* =========================================
+   2. THE CUSTOM HEADER LINE
+   ========================================= */
+body #root .game-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: -7px; /* Extends exactly 7px to cover the 4px offset + 3px shadow */
+  height: 3px;
+  background-color: var(--dark);
+} 
+
+/* 2. Push the Timer/Silhouette wrapper 4px to the right so its shadow perfectly matches the top buttons */
+body #root .searchbar .time-hint-wrapper {
+    margin-right: -2px !important;
+}
 .logo-mini {
   font-family: var(--heading2);
   font-size: 4rem;
@@ -129,7 +219,11 @@ body #root .ipl-logo-img {
   display: grid;
   grid-template-columns: max-content max-content;
   grid-template-rows: max-content max-content;
-  justify-content: center;
+  gap: 13px; /* The gap handles the spacing perfectly inside the grid */
+  justify-content: flex-end;
+}
+body #root .header-buttons .game-btn {
+  margin: 0 !important; 
 }
 
 header-buttons .game-btn {
@@ -799,61 +893,236 @@ body.flashback-theme {
     background-color: var(--biege); 
 }
 /* =========================================
-   3. SEARCH BAR, TIMER & GAME BOARD
+   SEARCH BAR & GAMEPLAY CONTROLS (EXACT POELTL 3D)
    ========================================= */
 
-/* --- SEARCH BAR AREA --- */
-.search-area {
+/* 1. Main Row Container */
+body #root .searchbar {
   display: flex;
-  flex-wrap: nowrap;  
+  justify-content: space-between;
+  align-items: stretch;
+  gap: 20px; /* Slight increase to account for the shadow extrusion */
   width: 100%;
+  box-sizing: border-box;
   margin-bottom: 30px;
-  align-items: flex-start;
-  gap: 20px;
+  height: 55px; 
 }
 
-.search-input-wrapper {
-  flex: 1; 
-  min-width: 200px;
-  height: 55px;
+/* 2. THE SECRET SAUCE: Layered 3D Extrusion */
+body #root .searchbar .input-wrapper,
+body #root .searchbar .horizontal-button,
+body #root .searchbar .time {
+  background-color: var(--white);
+  border: none; /* CRITICAL: Remove standard borders! */
+  
+  /* The Poeltl Layered Shadow */
+  box-shadow: 
+    0px 0px 0px 3px var(--dark), /* Acts as the solid border */
+    1px 1px 0px 3px var(--dark), 
+    2px 2px 0px 3px var(--dark), 
+    3px 3px 0px 3px var(--dark), 
+    4px 4px 0px 3px var(--dark);
+    
+  /* Offset the element so the shadow has room to draw */
+  transform: translate(-4px, -4px); 
+  transition: box-shadow .1s ease-in-out, transform .1s ease-in-out;
+}
+
+/* 3. The Click / Hover / Focus Animation (Flattening the block) */
+body #root .searchbar .input-wrapper:hover,
+body #root .searchbar .input-wrapper:focus-within,
+body #root .searchbar .horizontal-button:hover,
+body #root .searchbar .horizontal-button:focus-visible,
+body #root .searchbar .horizontal-button.activated {
+  transform: translate(0px, 0px);
+  /* Strips away the 3D layers, leaving only the 3px border */
+  box-shadow: 0px 0px 0px 3px var(--dark); 
+  outline: none;
+}
+
+/* =========================================
+   INTERNAL STYLING
+   ========================================= */
+
+/* The '?' Block */
+/* =========================================
+   THE '?' BLOCK (EXACT POELTL STYLING)
+   ========================================= */
+
+body #root .searchbar .input-wrapper .question-mark {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-family: var(--heading2), "Teko", sans-serif;
+  font-weight: 500;
+  font-size: 2.9rem;
   cursor: text;
-  padding: 0;
-  justify-content: flex-start;
+  
+  /* ONE single padding rule. The 8px top padding nudges the tall Teko font down to true center */
+  padding: 8px 15px 0px 15px !important; 
+  line-height: 1 !important;
+  
+  /* Borders & Colors */
+  border-right: 3px solid var(--dark);
+  margin: 0;
+  color: var(--dark);
+  background-color: var(--white);
+  transition: background-color 0.1s ease-in-out, color 0.1s ease-in-out, text-shadow 0.1s linear;
+}
+/* --- THE ACTIVE / FOCUS STATE --- */
+/* When the user clicks into the input field, the '?' instantly transforms */
+body #root .searchbar .input-wrapper:focus-within .question-mark {
+  color: var(--white);
+  background-color: var(--primary, var(--blue)); /* Uses your primary theme color */
+  border-color: var(--dark);
+  
+  /* The heavy Poeltl text-shadow outline */
+  text-shadow: 
+    3px 3px 0 var(--dark), 
+    -3px -3px 0 var(--dark), 
+    3px -3px 0 var(--dark), 
+    -3px 3px 0 var(--dark), 
+    0px 3px 0 var(--dark), 
+    0px -3px 0 var(--dark), 
+    3px 0px 0 var(--dark), 
+    -3px 0px 0 var(--dark);
 }
 
-.search-icon-block {
+/* --- MOBILE RESPONSIVENESS --- */
+@media (max-width: 800px) {
+  body #root .searchbar .input-wrapper .question-mark {
+    font-size: 2.5rem;
+  }
+}
+/* Text Input */
+body #root .searchbar .input-wrapper input {
+  flex-grow: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 0 15px;
+  font-family: inherit;
+  font-size: 1.4rem;
+  color: var(--dark);
+  width: 100%;
+}
+
+/* Hide Accessibility Label visually */
+body #root .searchbar .input-wrapper .sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;
+}
+
+/* Right Side Wrapper */
+body #root .searchbar .time-hint-wrapper {
+  display: flex;
+  gap: 20px;
+  align-items: stretch; 
+}
+
+/* Silhouette Button Contents */
+body #root .searchbar .horizontal-button {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 55px;
-  height: 100%;
-  font-size: 2rem;
-  font-family: var(--heading2);
-  border-right: 3px solid var(--dark);
-  background: var(--white);
-}
-
-.poeltl-input {
-  flex: 1;
-  height: 100%;
   padding: 0 15px;
-  font-size: 1.5rem;
-  font-family: var(--heading);
-  background: transparent;
+  white-space: nowrap; 
+  cursor: pointer;
 }
 
-/* Timer and Silhouette Button */
-.silhouette-btn {
-  height: 55px;
-  order: 2;
+body #root .searchbar .horizontal-button .content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.timer-display {
-  height: 55px;
-  width: 140px;
-  flex-shrink: 0;
-  order: 3;
+body #root .searchbar .horizontal-button label {
+  font-family: var(--heading2), "Teko", sans-serif !important;
+  font-size: 1.8rem !important; /* Bumped up from 1.3rem to match header */
+  font-weight: 400 !important;
+  line-height: 1; /* Keeps the tall Teko font perfectly centered */
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  margin: 0;
+  margin-top: 2px; /* Teko sometimes sits high, this nudges it down to center with the icon */
 }
+/* Timer Specifics */
+body #root .searchbar .time {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 130px; /* Stops Jittering */
+  font-family: var(--heading2), "Teko", sans-serif;
+  font-size: 2rem;
+  letter-spacing: 1px;
+  color: var(--dark);
+  font-family: var(--heading2), "Teko", sans-serif !important;
+  font-variant-numeric: tabular-nums; 
+}
+
+
+/* =========================================
+   PERFECT VERTICAL ALIGNMENT FIX
+   ========================================= */
+
+/* 1. Lock the master row to an exact height */
+body #root .searchbar {
+    height: 50px !important;
+    align-items: stretch;
+}
+
+/* 2. Force the React middle-man wrapper div to stretch */
+/* (> div:first-child targets the invisible wrapper inside the SearchBar component) */
+body #root .searchbar > div:first-child {
+    display: flex;
+    height: 100%;
+}
+
+/* 3. Force all interactive blocks to exactly match the row height */
+body #root .searchbar .input-wrapper,
+body #root .searchbar .horizontal-button,
+body #root .searchbar .time {
+    height: 100% !important;
+    box-sizing: border-box;
+}
+
+/* 4. Strip the uneven padding from the '?' block that was warping the height */
+body #root .searchbar .input-wrapper .question-mark {
+    height: 100% !important;
+    width: 55px !important; /* Forces it to be a perfect square */
+    padding: 0 !important;  /* Removes the top/bottom padding causing the stretch */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+/* =========================================
+   SILHOUETTE BUTTON ACTIVATED STATE
+   ========================================= */
+
+body #root .searchbar .horizontal-button {
+  transition: background-color 0.1s ease-in-out, color 0.1s ease-in-out;
+}
+
+body #root .searchbar .horizontal-button.activated {
+  background-color: var(--orange);
+  color: var(--white);
+  
+  /* Add the Poeltl heavy outline so the white text pops */
+  text-shadow: 
+    2px 2px 0px var(--dark), 
+    -2px -2px 0px var(--dark), 
+    2px -2px 0px var(--dark), 
+    -2px 2px 0px var(--dark), 
+    0px 2px 0px var(--dark), 
+    0px -2px 0px var(--dark), 
+    2px 0px 0px var(--dark), 
+    -2px 0px 0px var(--dark);
+}
+body #root .searchbar .horizontal-button.activated:hover,
+body #root .searchbar .horizontal-button.activated:focus-visible {
+  background-color: var(--halfOrange);  
+}
+
+
 
 /* --- THE TABLE & GRID (Converted to CSS Grid for Responsiveness) --- */
 .table-container {
@@ -952,25 +1221,6 @@ body.flashback-theme {
 
 
 
-
-/* --- THE 3D LOGO --- */
-
-
-
-
-
-
-
-
-
-
-  /* Right Side: Forces buttons into a 1-column stack */
-  body #root .header-buttons {
-    width: auto;
-    flex-direction: column;
-  }
-}
-
 .tagline-top {
   display: flex;
   align-items: center;
@@ -1028,3 +1278,201 @@ body #root .ipl-brand-group {
     font-size: 0.9rem;
     padding: 5px;
   }
+
+  
+
+  /* =========================================
+   GUESSES GRID SYSTEM (10 COLUMNS)
+   ========================================= */
+body #root .guesses {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  margin-top: 15px;
+}
+
+/* --- 1. HEADER ALIGNMENT --- */
+body #root .guesses .heading {
+  display: grid;
+  /* CRITICAL FIX: minmax(0, 1fr) prevents content from stretching the columns */
+  grid-template-columns: minmax(130px, 1.5fr) repeat(9, minmax(0, 1fr));
+  column-gap: 6px;
+  width: 100%;
+  padding: 0 3px; 
+  margin-bottom: 10px;
+  border-bottom: 2px dashed var(--dark); 
+  padding-bottom: 10px;
+  box-sizing: border-box;
+}
+
+body #root .guesses .heading div {
+  font-family: var(--heading2), "Teko", sans-serif;
+  font-size: 1.6rem;
+  font-weight: 500;
+  color: var(--dark);
+  text-align: center;
+}
+
+body #root .guesses .heading div:first-child {
+  text-align: left;
+  padding-left: 12px;
+  border-right: 2px solid transparent; 
+}
+
+/* --- 2. ROW WRAPPERS (UNIFORM HEIGHT) --- */
+body #root .guesses .guess-wrapper {
+  position: relative;
+  width: 100%;
+  height: 70px; /* Hard-locked height ensures every row is identical */
+}
+
+/* --- 3. THE PLAYED DATA ROW --- */
+body #root .guesses .row {
+  display: grid;
+  /* Matches the exact locked math of the header */
+  grid-template-columns: minmax(130px, 1.5fr) repeat(9, minmax(0, 1fr));
+  width: 100%;
+  height: 70px; 
+  column-gap: 6px;
+  background-color: var(--white);
+  border: 3px solid var(--dark);
+  box-shadow: 4px 4px 0px #dfb15b; 
+  padding: 0; 
+  box-sizing: border-box;
+}
+
+/* --- 4. STRUCTURAL CELLS --- */
+body #root .guesses .row > div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  box-sizing: border-box;
+  
+  /* CRITICAL FIX: Prevents flexbox from forcing the grid cell open */
+  min-width: 0; 
+  container-type: inline-size;
+}
+
+/* The Dashed Name Cell */
+body #root .guesses .row .cell-name {
+  justify-content: flex-start;
+  padding-left: 12px;
+  border-right: 2px dashed var(--dark); 
+  font-family: sans-serif;
+  font-size: 1.05rem;
+  color: var(--dark);
+}
+
+/* --- 5. MATCH BADGES (Inner Wrapper) --- */
+body #root .guesses .row .badge {
+  display: inline-flex; 
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 3px 5px; 
+  border: 3px solid transparent;
+  
+  font-family: var(--heading1), "Teko", sans-serif;;
+  font-weight: bold;
+  font-size: 1rem;
+  color: var(--dark);
+  text-align: center;
+  background-color: transparent;
+  line-height: 1; 
+  letter-spacing: 0.5px;
+  max-width: 100%; 
+  box-sizing: border-box;
+  
+  /* Pushes the badge slightly up and left so the shadow has room to draw */
+  margin-bottom: 4px;
+  margin-right: 4px;
+}
+body #root .guesses .row .badge span {
+  text-align: center;
+  display: inline-block;
+  line-height: 1; 
+  overflow-wrap: break-word; 
+  font-size: clamp(0.85rem, 15cqi, 1.25rem);
+}
+/* Green Exact Match */
+body #root .guesses .row .badge.equal {
+  background-color: var(--white);
+  border-color: var(--equal);
+  box-shadow: 0.5px 0.5px 0px var(--equal),
+              1px 1px 0px var(--equal),
+              1.5px 1.5px 0px var(--equal),
+              2px 2px 0px var(--equal),
+              2.5px 2.5px 0px var(--equal),
+              3px 3px 0px var(--equal),
+              3.5px 3.5px 0px var(--equal),
+              4px 4px 0px var(--equal); 
+}
+
+/* Yellow Partial Match */
+body #root .guesses .row .badge.close {
+  background-color: var(--white);
+  border-color: var(--close);
+  box-shadow: 0.5px 0.5px 0px var(--close),
+              1px 1px 0px var(--close),
+              1.5px 1.5px 0px var(--close),
+              2px 2px 0px var(--close),
+              2.5px 2.5px 0px var(--close),
+              3px 3px 0px var(--close),
+              3.5px 3.5px 0px var(--close),
+              4px 4px 0px var(--close); 
+}
+body #root .guesses .row .badge span {
+  text-align: center;
+  display: inline-block;
+  line-height: 1; 
+}
+
+/* Icons */
+body #root .guesses .row .badge svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+/* --- 6. MOBILE HORIZONTAL SCROLL --- */
+@media (max-width: 1000px) {
+  body #root .guesses {
+    overflow-x: auto;
+    padding-bottom: 10px;
+  }
+  body #root .guesses .heading,
+  body #root .guesses .row {
+    min-width: 900px;
+  }
+}
+
+/* UP ARROW (Using your exact percentages) */
+@keyframes PointUp {
+    0%   { transform: translateY(0%); }
+    25%  { transform: translateY(-5%); }
+    50%  { transform: translateY(-20%); }
+    75%  { transform: translateY(-5%); }
+    100% { transform: translateY(0%); }
+}
+
+/* DOWN ARROW (Inverted to bounce downward) */
+@keyframes PointDown {
+    0%   { transform: translateY(0%); }
+    25%  { transform: translateY(5%); }
+    50%  { transform: translateY(20%); }
+    75%  { transform: translateY(5%); }
+    100% { transform: translateY(0%); }
+}
+
+/* Notice the duration is set to a crisp 1s to match the "faster" feel */
+body #root .guesses .row .badge svg.arrow-up {
+  animation: PointUp 1s linear infinite;
+  margin-left: 2px; 
+}
+
+body #root .guesses .row .badge svg.arrow-down {
+  animation: PointDown 1s linear infinite;
+  margin-left: 2px;
+}
