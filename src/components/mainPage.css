@@ -202,17 +202,6 @@ body #root .game-header::after {
 body #root .searchbar .time-hint-wrapper {
     margin-right: -2px !important;
 }
-.logo-mini {
-  font-family: var(--heading2);
-  font-size: 4rem;
-  line-height: 1;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  color: var(--white);
-  text-shadow: 2px 2px 0px #facc15, 4px 4px 0px var(--dark);
-  -webkit-text-stroke: 2px var(--dark);
-  margin-right: 15px;
-}
 
 
 .header-buttons {
@@ -334,14 +323,15 @@ body #root header .group:first-child a.logo-link:focus-visible {
 /* --- THE 3D LOGO (Acting as Poeltl's SVG) --- */
 body #root header .group:first-child .logo {
     display: block;
-    font-family: var(--heading2), "Teko", sans-serif;
-    font-size: 5.5rem;
+    font-family:  "Arial Black", "Arial Bold", Gadget, sans-serif;
+    font-size: 3rem;
     line-height: 0.8;
+    letter-spacing: -2px;
     color: var(--white);
     -webkit-text-stroke: 3px var(--dark);
     text-shadow: 
       0px 1px 0 var(--dark), 0px 2px 0 var(--dark), 0px 3px 0 var(--dark),
-      0px 4px 0 var(--yellow), 0px 5px 0 var(--yellow), 0px 6px 0 var(--yellow), 0px 7px 0 var(--yellow),
+      0px 4px 0 var(--primary), 0px 5px 0 var(--primary), 0px 6px 0 var(--primary), 0px 7px 0 var(--primary), 0px 8px 0 var(--primary),
       0px 8px 0 var(--dark), -1px 8px 0 var(--dark), 1px 8px 0 var(--dark);
     padding-bottom: 8px;
     margin: 0;
@@ -1287,7 +1277,7 @@ body #root .ipl-brand-group {
 body #root .guesses {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 20px;
   width: 100%;
   margin-top: 15px;
 }
@@ -1423,11 +1413,7 @@ body #root .guesses .row .badge.close {
               3.5px 3.5px 0px var(--close),
               4px 4px 0px var(--close); 
 }
-body #root .guesses .row .badge span {
-  text-align: center;
-  display: inline-block;
-  line-height: 1; 
-}
+
 
 /* Icons */
 body #root .guesses .row .badge svg {
@@ -1475,4 +1461,86 @@ body #root .guesses .row .badge svg.arrow-up {
 body #root .guesses .row .badge svg.arrow-down {
   animation: PointDown 1s linear infinite;
   margin-left: 2px;
+}
+
+body #root .guesses .row[aria-disabled="false"] {
+  background-color: var(--white);
+  border: 3px solid var(--dark);
+  box-shadow: 
+    4px 4px 0px 0px var(--primary), 
+    4px 4px 0px 3px var(--dark);
+}
+
+/* UNPLAYED ROW STYLING (Strips borders/backgrounds so the grid is invisible) */
+body #root .guesses .row[aria-disabled="true"] {
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+/* Removes the dashed line inside the empty name cell */
+body #root .guesses .row[aria-disabled="true"] .cell-name {
+  border-right: none;
+}
+
+/* --- 4. THE UNPLAYED COVER OVERLAY --- */
+body #root .guesses .cover {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  /* Draws the signature dashed box */
+  border: 2px dashed var(--dark);
+  background-color: transparent;
+  box-sizing: border-box;
+  z-index: 5;
+}
+
+body #root .guesses .cover span {
+  font-family: 'Chakra Petch', sans-serif; /* Uses your new arcade font */
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--dark);
+  line-height: 1;
+  padding-top: 4px; /* Optical alignment */
+}
+/* Shared Timer Container */
+body #root .searchbar .time {
+  display: flex;
+  
+  /* CRITICAL: Stacks the text. If there is only one item (active timer), 
+     it still perfectly centers it! */
+  flex-direction: column; 
+  align-items: center;
+  justify-content: center;
+  
+  width: 130px; 
+  min-height: 50px; /* Gives the box a floor so it doesn't crush the text */
+  padding: 4px 0; /* Gives the top and bottom breathing room */
+  
+  font-family: var(--heading2), "Teko", sans-serif !important;
+  color: var(--dark);
+  font-variant-numeric: tabular-nums;
+  
+  /* CRITICAL: Kills the invisible spacing that causes top-border clipping */
+  line-height: 1; 
+}
+
+/* The smaller "NEXT IN" text */
+body #root .searchbar .time .next-label {
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+  color: #666; /* Gives it a slight visual hierarchy */
+  margin-bottom: 2px; /* Tiny gap before the numbers */
+}
+
+/* The large numbers (used for both active and completed states) */
+body #root .searchbar .time .timer-numbers {
+  font-size: 2rem;
+  letter-spacing: 1px;
 }

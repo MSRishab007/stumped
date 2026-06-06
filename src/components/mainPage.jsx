@@ -442,7 +442,7 @@ const handleGuessSubmit = (chosenPlayer) => {
           <h1>STUMPED</h1>
           
           <a href="/" aria-label="Link to homepage" className="logo-link">
-            <span className="logo">STUMPED</span>
+            <span className="logo">Stumped</span>
           </a>
           
           <h2>
@@ -660,16 +660,18 @@ const handleGuessSubmit = (chosenPlayer) => {
               </div>
             </button>
 
-            <div className="time" role="timer" aria-label="Game Timer">
-              {gameStatus === 'playing' ? (
-                <span>{formatTime(seconds)}</span>
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: '1.2' }}>
-                  <span style={{ fontSize: '1rem', color: '#666', textTransform: 'uppercase' }}>Next in</span>
-                  <span>{countdown}</span>
-                </div>
-              )}
-            </div>
+            <div className="time" role="timer" aria-label={gameStatus === 'playing' ? "Game Timer" : "Next Game Timer"}>
+  {gameStatus === 'playing' ? (
+    /* Active Game State */
+    <span className="timer-numbers">{formatTime(seconds)}</span>
+  ) : (
+    /* Game Over State (Uses React Fragment to avoid extra divs) */
+    <>
+      <span className="next-label">NEXT IN</span>
+      <span className="timer-numbers">{countdown}</span>
+    </>
+  )}
+</div>
 
           </div>
         </div>
@@ -691,67 +693,81 @@ const handleGuessSubmit = (chosenPlayer) => {
   <div role="columnheader">Wickets</div>
 </div>
 
-  {/* 2. The 7 Guess Rows */}
-{[...Array(7)].map((_, index) => {
-  const guess = guesses[index]; 
-  const isGuessed = !!guess;
+{/* 2. The 7 Guess Rows */}
+  {[...Array(7)].map((_, index) => {
+    const guess = guesses[index]; 
+    const isGuessed = !!guess;
 
-  let result, evaluatedAge;
-  if (isGuessed) {
-    result = getGuessResult(guess, targetPlayer);
-    const birthYear = guess.dob ? guess.dob.split('-')[2] : 2026;
-    evaluatedAge = 2026 - parseInt(birthYear || 2000);
-  }
+    let result, evaluatedAge;
+    if (isGuessed) {
+      result = getGuessResult(guess, targetPlayer);
+      const birthYear = guess.dob ? guess.dob.split('-')[2] : 2026;
+      evaluatedAge = 2026 - parseInt(birthYear || 2000);
+    }
 
-  return (
-    <div key={index} id={`guess${index}`} role="row" className={`guess ${isGuessed ? 'activated' : ''}`}>
-      <div className="guess-wrapper">
-        
-        {isGuessed ? (
-          /* --- THE PLAYED ROW --- */
-          <div className="row" aria-disabled="false">
-            <div role="cell" className="cell-name">
-              <strong>{guess.name}</strong>
-            </div>
+    return (
+      <div key={index} id={`guess${index}`} role="row" className={`guess ${isGuessed ? 'activated' : ''}`}>
+        <div className="guess-wrapper">
+          
+          {/* THE ROW (Always renders, even if empty, so the grid holds its shape) */}
+          <div className="row" aria-disabled={!isGuessed}>
             
-            {/* Map the 9 data columns */}
-            {[
-              { val: guess?.currentFranchise, res: result?.team },
-              { val: guess?.role ? guess.role.replace(/Top-Order/gi, 'Top\u00A0Order').replace(/Middle-Order/gi, 'Middle\u00A0Order').replace(/Wicketkeeper/gi, 'WK').replace(/-/g, ' ') : 'Null', res: result?.role },
-              { val: guess?.battingHand, res: result?.battingHand },
-              { val: evaluatedAge, res: result?.age },
-              { val: (!guess?.debutYear || guess?.debutYear === 'Unknown') ? 'NA' : guess.debutYear, res: result?.debutYear },
-              { val: guess?.auctionPrice, res: result?.auctionPrice },
-              { val: guess?.matches, res: result?.matches },
-              { val: guess?.runs, res: result?.runs },
-              { val: guess?.wickets, res: result?.wickets }
-            ].map((item, i) => {
-              // Fetch the class ('equal', 'close', 'far')
-              const statusClass = item.res?.status ? getBoxClass(item.res.status) : '';
-              
-              return (
-                <div key={i} role="cell">
-                  {/* The inner badge contains the borders safely */}
-                  <div className={`badge ${statusClass}`}>
-                    <span>{item.val ?? 'Null'}</span>
-                    {renderArrow(item.res?.direction)}
-                    <ResultIcon status={item.res?.status} />
-                  </div>
+            {isGuessed ? (
+              /* --- PLAYED CELLS --- */
+              <>
+                <div role="cell" className="cell-name">
+                  <strong>{guess.name}</strong>
                 </div>
-              );
-            })}
+                
+                {/* Map the 9 data columns */}
+                {[
+                  { val: guess?.currentFranchise, res: result?.team },
+                  { val: guess?.role ? guess.role.replace(/Bowling Allrounder/gi, 'Bowling AR').replace(/Batting Allrounder/gi, 'Batting AR').replace(/Top-Order/gi, 'Top\u00A0Order').replace(/Middle-Order/gi, 'Middle\u00A0Order').replace(/Wicketkeeper/gi, 'WK').replace(/-/g, ' ') : 'Null', res: result?.role },
+                  { val: guess?.battingHand, res: result?.battingHand },
+                  { val: evaluatedAge, res: result?.age },
+                  { val: (!guess?.debutYear || guess?.debutYear === 'Unknown') ? 'NA' : guess.debutYear, res: result?.debutYear },
+                  { val: guess?.auctionPrice, res: result?.auctionPrice },
+                  { val: guess?.matches, res: result?.matches },
+                  { val: guess?.runs, res: result?.runs },
+                  { val: guess?.wickets, res: result?.wickets }
+                ].map((item, i) => {
+                  const statusClass = item.res?.status ? getBoxClass(item.res.status) : '';
+                  return (
+                    <div key={i} role="cell">
+                      <div className={`badge ${statusClass}`}>
+                        <span>{item.val ?? 'Null'}</span>
+                        {renderArrow(item.res?.direction)}
+                        <ResultIcon status={item.res?.status} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </>
+            ) : (
+              /* --- UNPLAYED EMPTY CELLS (Draws the invisible grid for alignment) --- */
+              <>
+                <div role="cell" className="cell-name"></div>
+                <div role="cell"></div><div role="cell"></div>
+                <div role="cell"></div><div role="cell"></div>
+                <div role="cell"></div><div role="cell"></div>
+                <div role="cell"></div><div role="cell"></div>
+                <div role="cell"></div>
+              </>
+            )}
+
           </div>
-        ) : (
-          /* --- THE UNPLAYED COVER --- */
-          <div className="cover">
-            <span>{index + 1}</span>
-          </div>
-        )}
-        
+
+          {/* THE COVER (Only shows if NOT guessed. Overlays on top of the empty row) */}
+          {!isGuessed && (
+            <div className="cover">
+              <span>{index + 1}</span>
+            </div>
+          )}
+          
+        </div>
       </div>
-    </div>
-  );
-})}
+    );
+  })}
 </div>
       </main>
     </div>
