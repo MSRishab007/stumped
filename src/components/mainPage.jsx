@@ -540,49 +540,100 @@ const handleGuessSubmit = (chosenPlayer) => {
           </div>
         </div>
 
-        {/* --- 2. STATS --- */}
-        <div className={`stats row ${activeModal === 'stats' ? '' : 'closed'}`}>
-          <div className={`expandable-menu ${activeModal === 'stats' ? '' : 'closed'}`}>
-            <div className="content" style={{ display: 'flex', flexWrap: 'wrap' }}>
-              
-              {/* Guess Distribution */}
-              <div className="guess-distribution" style={{ flexGrow: 1 }}>
-                <div className="content">
-                  <h3>Guess Distribution</h3>
-                  <div className="chart" style={{ display: 'flex', gap: '5px' }}>
-                    {[1, 2, 3, 4, 5, 6, 7, 8].map(num => {
-                      const count = stats.distribution[num] || 0;
-                      const maxCount = Math.max(...Object.values(stats.distribution), 1);
-                      const heightPct = Math.max((count / maxCount) * 100, 5); // Minimum 5% height so the bar is visible
-                      return (
-                        <div key={num} className="guess" style={{ display: 'flex', flexDirection: 'column-reverse', flexGrow: 1 }}>
-                          <label>{num === 8 ? 'Fail' : num}</label>
-                          <div className="bar-wrapper" style={{ display: 'flex', alignItems: 'flex-end', height: '100px' }}>
-                            <div className="bar" style={{ height: `${heightPct}%`, width: '100%', backgroundColor: 'var(--green)', border: '2px solid var(--dark)' }}>
-                              {count > 0 && <p style={{ textAlign: 'center', marginTop: '-20px', fontWeight: 'bold' }}>{count}</p>}
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
+        {/* --- THE STATS OVERLAY --- */}
+<div className={`stats ${activeModal === 'stats' ? '' : 'closed'}`}>
+  
+  {/* LEFT SIDE: Guess Distribution */}
+  <div className="expandable-menu guess-distribution">
+    <div className="content">
+      <h3>Guess Distribution</h3>
+      <div className="chart" aria-label="Guess Distribution Chart">
+        
+        {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => {
+          const count = stats.distribution[num] || 0;
+          const maxCount = Math.max(...Object.values(stats.distribution), 1);
+          
+          // Using 90% so it doesn't touch the top dashed line
+          const heightPercent = count > 0 ? (count / maxCount) * 90 : 0;
+
+          return (
+            <div className="guess" key={num}>
+              {/* Updated to 'OUT' based on your screenshot */}
+              <label>{num === 8 ? 'OUT' : num}</label>
+              <div className="bar-wrapper">
+                {/* Fallback inline styles to ensure the green block actually renders */}
+                <div 
+                  className={`bar ${count > 0 ? 'active' : ''}`} 
+                  style={{ 
+                    height: `${heightPercent}%`, 
+                    backgroundColor: count > 0 ? '#00d200' : 'transparent',
+                    width: '100%',
+                    border: count > 0 ? '2px solid var(--dark)' : 'none',
+                    borderBottom: 'none'
+                  }}
+                >
+                  {count > 0 && <p>{count}</p>}
                 </div>
               </div>
-
-              {/* Numbers Box */}
-              <div className="numbers" style={{ flexGrow: 1, minWidth: '150px' }}>
-                <div className="content">
-                  <h5><span>Played</span> <strong>{stats.gamesPlayed}</strong></h5>
-                  <h5><span>Win %</span> <strong>{winPercentage}%</strong></h5>
-                  <h5><span>Streak</span> <strong>{stats.currentStreak}</strong></h5>
-                  <h5><span>Max Streak</span> <strong>{stats.maxStreak}</strong></h5>
-                </div>
-              </div>
-
             </div>
+          );
+        })}
+        
+      </div>
+      <a href="/" className="stats-link">Click to reload your Stumped stats <br/><small>(And please allow it to redirect)</small></a>
+    </div>
+  </div>
+
+  {/* RIGHT SIDE: Stats Column */}
+  <div className="column">
+    
+    {/* 1. The Numbers Grid */}
+    <div className="expandable-menu numbers">
+      <div className="content">
+        <div className="stat-grid">
+          <div className="stat-block">
+            <label>Games Played</label>
+            <h5>{stats.gamesPlayed || 0}</h5>
+          </div>
+          <div className="stat-block">
+            <label>Current Streak</label>
+            <h5>{stats.currentStreak || 0}</h5>
+          </div>
+          <div className="stat-block">
+            <label>Longest Streak</label>
+            <h5>{stats.maxStreak || 0}</h5>
+          </div>
+          <div className="stat-block">
+            <label>Win Percentage</label>
+            <h5>{winPercentage || 0}%</h5>
           </div>
         </div>
+      </div>
+    </div>
 
+    {/* 2. The Current Game & Close Button Row */}
+    <div className="row">
+      <div className="expandable-menu current-game">
+        <div className="content">
+          <label>Current Game:</label> 
+          {/* Using your exact function here! */}
+          <h5>{getGameNumber(new Date())}</h5>
+        </div>
+      </div>
+      
+      <button className="button horizontal-button close-btn" onClick={() => setActiveModal(null)} role="button">
+        <div className="content">
+          <svg className="close-icon" viewBox="0 0 27.88 27.88">
+            <path fill="red" d="m23.49,26.88c-.9,0-1.75-.35-2.39-.99l-7.16-7.16-7.16,7.16c-.64.64-1.49.99-2.39.99s-1.75-.35-2.39-.99c-.64-.64-.99-1.49-.99-2.39s.35-1.75.99-2.39l7.16-7.16L1.99,6.78c-.64-.64-.99-1.49-.99-2.39s.35-1.75.99-2.39c.64-.64,1.49-.99,2.39-.99s1.75.35,2.39.99l7.16,7.16,7.16-7.16c.64-.64,1.49-.99,2.39-.99s1.75.35,2.39.99c.64.64.99,1.49.99,2.39s-.35,1.75-.99,2.39l-7.16,7.16,7.16,7.16c.64.64.99,1.49.99,2.39s-.35,1.75-.99,2.39c-.64.64-1.49.99-2.39.99Z"></path>
+            <path fill="var(--dark)" d="m23.49,2c.61,0,1.22.23,1.69.7.93.93.93,2.44,0,3.37l-7.87,7.87,7.87,7.87c.93.93.93,2.44,0,3.37-.47.47-1.08.7-1.69.7s-1.22-.23-1.69-.7l-7.87-7.87-7.87,7.87c-.47.47-1.08.7-1.69.7s-1.22-.23-1.69-.7c-.93-.93-.93-2.44,0-3.37l7.87-7.87L2.7,6.07c-.93-.93-.93-2.44,0-3.37.47-.47,1.08-.7,1.69-.7s1.22.23,1.69.7l7.87,7.87,7.87-7.87c.47-.47,1.08-.7,1.69-.7m0-2c-1.17,0-2.27.46-3.1,1.28l-6.45,6.45L7.48,1.28c-.83-.83-1.93-1.28-3.1-1.28S2.11.46,1.28,1.28c-.83.83-1.28,1.93-1.28,3.1s.46,2.27,1.28,3.1l6.45,6.45-6.45,6.46c-.83.83-1.28,1.93-1.28,3.1s.46,2.27,1.28,3.1c.83.83,1.93,1.28,3.1,1.28s2.27-.46,3.1-1.28l6.45-6.46,6.45,6.46c.83.83,1.93,1.28,3.1,1.28s2.27-.46,3.1-1.28c.83-.83,1.28-1.93,1.28-3.1s-.46-2.27-1.28-3.1l-6.45-6.45,6.45-6.46c.83-.83,1.28-1.93,1.28-3.1s-.46-2.27-1.28-3.1c-.83-.83-1.93-1.28-3.1-1.28h0Z"></path>
+          </svg>
+          <label>Close</label>
+        </div>
+      </button>
+    </div>
+    
+  </div>
+</div>
         {/* --- 3. HELP --- */}
         <div className={`help row ${activeModal === 'help' ? '' : 'closed'}`}>
           <div className={`expandable-menu ${activeModal === 'help' ? '' : 'closed'}`}>

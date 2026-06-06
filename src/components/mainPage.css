@@ -527,74 +527,263 @@ body #root .top-menu .help li {
   line-height: 130%;
 }
 
-/* --- STATS PANEL: GUESS DISTRIBUTION CHART --- */
-body #root .top-menu .stats .guess-distribution .chart {
+/* --- STATS PANEL --- */
+/* =========================================
+   POELTL STATS MENU UI
+   ========================================= */
+
+/* --- OVERLAY VISIBILITY --- */
+body #root .stats-modal-overlay {
   display: flex;
-  align-items: stretch;
-  padding-top: 2rem;
-  height: 150px; /* Fixed height for the bars to grow inside */
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 5vh; 
 }
 
-body #root .top-menu .stats .guess-distribution .guess {
-  display: flex;
-  flex-direction: column-reverse;
-  flex-grow: 1;
-  justify-content: flex-end;
+body #root .stats-modal-overlay.closed {
+  display: none;
 }
 
-body #root .top-menu .stats .guess-distribution .guess label {
-  font-family: var(--heading2), "Teko", sans-serif;
-  font-size: 1.5rem;
-  font-weight: 700;
+/* --- MAIN CONTAINER --- */
+body #root .stats {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  font-family: var(--heading, sans-serif);
+}
+
+body #root .stats[aria-hidden="true"],
+body #root .stats.closed {
+  display: none;
+}
+
+/* --- BASE 3D ARCADE BOXES --- */
+body #root .stats .expandable-menu,
+body #root .stats .close-btn {
+  background-color: var(--white);
+  border: 3px solid var(--dark);
+  box-shadow: 
+    4px 4px 0px 0px var(--dark),
+    0px 4px 0px 0px var(--dark),
+    4px 0px 0px 0px var(--dark);
+  box-sizing: border-box;
+}
+
+/* --- LEFT COLUMN: GUESS DISTRIBUTION --- */
+body #root .stats .guess-distribution {
+  flex: 1.2;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+body #root .stats .guess-distribution h3 {
   text-align: center;
-  padding-top: 0.5rem;
-  border-top: 0.2rem solid var(--dark);
+  font-family: var(--heading, sans-serif);
+  font-size: 1.8rem;
+  text-transform: uppercase;
+  margin: 0 0 10px 0;
+  padding-bottom: 10px;
+  border-bottom: 2px dashed var(--dark);
   color: var(--dark);
 }
 
-body #root .top-menu .stats .guess-distribution .bar-wrapper {
+/* The Bar Chart Container */
+body #root .stats .chart {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  height: 140px; /* Taller container to give the floating numbers breathing room */
+  padding-top: 25px; /* Safe-zone so max numbers don't hit the dashed line */
+  border-bottom: 4px solid var(--dark); 
+  margin-bottom: 15px;
+}
+
+body #root .stats .guess {
+  display: flex;
+  flex-direction: column-reverse; /* Puts label under the bar */
+  align-items: center;
+  flex: 1;
+}
+
+body #root .stats .guess label {
+  font-family: var(--heading, sans-serif);
+  font-weight: bold;
+  font-size: 1.2rem;
+  margin-top: 8px; 
+  color: var(--dark);
+}
+
+body #root .stats .bar-wrapper {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+/* The Bars (Green when active, Flat when 0) */
+body #root .stats .bar {
+  width: 35px;
+  background-color: var(--white);
+  border: 2px solid var(--dark);
+  border-bottom: none; /* Merges it with the baseline visually */
   display: flex;
   justify-content: center;
-  align-items: flex-end;
-  height: 100%;
-  padding: 0 0.3rem;
-  margin-bottom: -0.175rem; /* Sits perfectly on the border */
+  align-items: flex-start;
+  transition: height 0.3s ease-in-out;
 }
 
-body #root .top-menu .stats .guess-distribution .bar {
-  flex-grow: 1;
-  background-color: var(--green); /* Uses your green variable */
-  border: 0.2rem solid var(--dark);
-  border-bottom: none;
-  border-radius: 0.2rem 0.2rem 0 0;
-  transition: height 0.4s ease-in-out;
+body #root .stats .bar.active {
+  /* Using standard Poeltl green here. Swap to var(--green) if defined in your variables */
+  background-color: #00d200; 
 }
 
-/* --- STATS PANEL: NUMBERS SUMMARY --- */
-body #root .top-menu .stats .numbers .content {
+body #root .stats .bar p {
+  margin: -25px 0 0 0; /* Floats the number above the bar */
+  font-family: var(--heading, sans-serif);
+  font-weight: bold;
+  font-size: 1.2rem;
+  color: var(--dark);
+}
+
+body #root .stats .stats-link {
+  display: block;
+  text-align: center;
+  color: var(--dark);
+  text-decoration: underline;
+  font-family: sans-serif;
+  font-size: 0.85rem;
+}
+
+/* --- RIGHT COLUMN: STATS NUMBERS & BUTTONS --- */
+body #root .stats .column {
+  flex: 1;
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  justify-content: space-between;
+  flex-direction: column; /* Current Game/Close on top, Grid on bottom */
+  gap: 20px;
 }
 
-body #root .top-menu .stats .numbers h5 {
+/* TOP ROW: Current Game & Close Button */
+body #root .stats .column .row {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  height: 65px; /* Locks the height so buttons don't stretch */
+  min-height: 65px;
+  max-height: 65px;
+}
+
+body #root .stats .current-game {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+body #root .stats .current-game .content {
   display: flex;
   flex-direction: column;
   align-items: center;
-  flex-basis: 45%;
-  margin: 0.5rem 0;
+  justify-content: center;
+  height: 100%;
+}
+
+body #root .stats .current-game label {
+  color: #999;
+  font-family: sans-serif;
+  font-size: 0.8rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+body #root .stats .current-game h5 {
+  margin: 0;
+  font-family: var(--heading, sans-serif);
+  font-size: 1.8rem;
+  color: var(--dark);
+}
+
+body #root .stats .close-btn {
+  flex: 1;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.1s ease-in-out;
+}
+
+/* Adds a satisfying physical "push" effect when clicking the close button */
+body #root .stats .close-btn:active {
+  transform: translate(2px, 2px); 
+  box-shadow: 
+    2px 2px 0px 0px var(--dark),
+    0px 2px 0px 0px var(--dark),
+    2px 0px 0px 0px var(--dark);
+}
+
+body #root .stats .close-btn .content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+body #root .stats .close-btn .close-icon {
+  width: 22px;
+  height: 22px;
+}
+
+body #root .stats .close-btn label {
+  font-family: var(--heading, sans-serif);
   font-size: 1.4rem;
+  text-transform: uppercase;
+  margin-top: 3px;
+  cursor: pointer;
+  color: var(--dark);
 }
 
-body #root .top-menu .stats .numbers h5 span {
-  font-weight: 500;
-  color: var(--middleGrey);
+/* BOTTOM SECTION: The 2x2 Grid for Numbers */
+body #root .stats .numbers {
+  padding: 20px;
+  flex: 1;
 }
 
-body #root .top-menu .stats .numbers h5 strong {
-  font-size: 2rem;
-  font-family: var(--heading2), "Teko", sans-serif;
+body #root .stats .stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 25px 15px;
+}
+
+body #root .stats .stat-block label {
+  display: block;
+  color: #999; 
+  text-transform: uppercase;
+  font-family: sans-serif;
+  font-size: 0.85rem;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+body #root .stats .stat-block h5 {
+  margin: 0;
+  font-family: var(--heading, sans-serif);
+  font-size: 2.2rem;
+  color: var(--dark);
+}
+
+/* =========================================
+   MOBILE RESPONSIVENESS (Stacking)
+   ========================================= */
+@media (max-width: 1000px) {
+  body #root .stats {
+    flex-direction: column;
+    padding: 0 10px;
+  }
 }
 
 /* --- FLASHBACK / CALENDAR OVERRIDES --- */
@@ -1429,7 +1618,7 @@ body #root .guesses .row .badge svg {
     padding-bottom: 10px;
   }
   body #root .guesses .heading,
-  body #root .guesses .row {
+  body #root .guesses .guess-wrapper {
     min-width: 900px;
   }
 }
