@@ -26,8 +26,8 @@
   letter-spacing: -6px;
   -webkit-text-stroke: 4px black;
   text-shadow: 
-    5px 5px 0px #eab308, 
-    10px 10px 0px black;
+    5px 5px 0px var(--primary), 
+    10px 10px 0px var(--primary),;
 }
 
 .main-subtext {
@@ -79,7 +79,7 @@
 }
 
 @media (max-width: 768px) {
-  .stumped-logo { font-size: 70px; -webkit-text-stroke: 2px black; text-shadow: 3px 3px 0px #eab308, 6px 6px 0px black; }
+  .stumped-logo { font-size: 70px; -webkit-text-stroke: 2px black; text-shadow: 3px 3px 0px var(--primary), 6px 6px 0px var(--dark); }
   .main-subtext { font-size: 22px; }
   .play-btn-text { font-size: 30px; }
 }

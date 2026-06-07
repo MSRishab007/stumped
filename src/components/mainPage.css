@@ -473,7 +473,40 @@ body #root .expandable-menu {
   transition: max-height 0.3s ease-in-out, margin 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
   margin-bottom: 1.5rem;
 }
-
+body #root .expandable-menu.suggestions {
+  width: 100%;
+  margin-bottom: 1.5rem;
+  transform: translateX(-4px);
+ 
+  background-color: var(--white);
+  overflow: hidden;
+ 
+  /* 3D shadow — matches every other element on the page */
+  box-shadow:
+    0px 0px 0px 3px var(--dark),
+    1px 1px 0px 3px var(--dark),
+    2px 2px 0px 3px var(--dark),
+    3px 3px 0px 3px var(--dark),
+    4px 4px 0px 3px var(--dark);
+ 
+  /* Height is set inline by JS — transitions open and closed */
+  transition:
+    height 0.25s ease-in-out,
+    margin 0.2s ease-in-out,
+    box-shadow 0.2s ease-in-out;
+}
+ 
+/* When closed: collapse shadow and margin so no gap remains */
+body #root .expandable-menu.suggestions[aria-hidden="true"] {
+  margin-bottom: 0;
+  box-shadow:
+    0px 0px 0px 0px var(--dark),
+    0px 0px 0px 0px var(--dark),
+    0px 0px 0px 0px var(--dark),
+    0px 0px 0px 0px var(--dark),
+    0px 0px 0px 0px var(--dark);
+}
+ 
 /* --- THE CLOSED STATE (SQUASHES THE BOX) --- */
 body #root .expandable-menu.closed {
   max-height: 0px !important;
@@ -1790,4 +1823,221 @@ body #root .top-menu .flashback .cal-day.active-playing-day::after {
 /* Ensure the active-selection overrides the dot if they overlap */
 body #root .top-menu .flashback .cal-day.active-selection.active-playing-day::after {
   background-color: var(--white); /* Dot turns white to be visible inside selection */
+}
+/* =====================================================
+   SEARCH SUGGESTIONS DROPDOWN
+   Matches selector: body #root .searchbar .suggestions .content button
+   ===================================================== */
+
+/* --- The dropdown list itself --- */
+body #root .searchbar .suggestions {
+  position: absolute;
+  top: calc(100% + 1.5rem); /* gap below the input row */
+  left: -4px;               /* align with the 3D shadow offset of the input */
+  right: 0;
+  z-index: 100;
+ 
+  background-color: var(--white);
+  overflow: hidden;
+ 
+  /* 3D shadow — matches every other element on the page */
+  box-shadow:
+    0px 0px 0px 3px var(--dark),
+    1px 1px 0px 3px var(--dark),
+    2px 2px 0px 3px var(--dark),
+    3px 3px 0px 3px var(--dark),
+    4px 4px 0px 3px var(--dark);
+ 
+  /* Height animates open/close — JS sets inline style */
+  transition:
+    height 0.25s ease-in-out,
+    box-shadow 0.2s ease-in-out;
+}
+ 
+/* Shadow collapses when closed so nothing bleeds during animation */
+body #root .searchbar .suggestions[aria-hidden="true"] {
+  box-shadow:
+    0px 0px 0px 0px var(--dark),
+    0px 0px 0px 0px var(--dark),
+    0px 0px 0px 0px var(--dark),
+    0px 0px 0px 0px var(--dark),
+    0px 0px 0px 0px var(--dark);
+}
+/* --- Each list item row --- */
+body #root .searchbar .suggestions .content {
+  display: flex;
+  flex-direction: column;
+}
+ 
+
+body #root .searchbar .suggestions .content:last-child {
+  border-bottom: none;
+}
+
+/* --- THE BUTTON — name text with the sliding gradient fill animation --- */
+body #root .searchbar .suggestions .content button {
+  font-family: var(--heading), sans-serif;
+  font-size: 1.25rem;
+  min-height: 1.75rem;
+  line-height: 100%;
+  font-weight: 600;
+  padding: .2rem .5rem;
+  color: var(--dark);
+ 
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: none;
+  outline: none;
+  background-color: transparent;
+ 
+  /* Sliding fill — invisible at rest, anchored to the right */
+  background-image: linear-gradient(
+    var(--dark),
+    var(--dark) 2px,
+    var(--primary) 2px,
+    var(--primary) calc(100% - 2px),
+    var(--dark) calc(100% - 2px),
+    var(--dark)
+  );
+  background-size: 0% 100%;
+  background-position: 100% 100%;
+  background-repeat: no-repeat;
+  cursor: pointer;
+ 
+  /* Transition lives on the BASE state so it applies in BOTH directions */
+  transition:
+    background-size .4s ease-in-out,
+    color .25s ease-in-out,
+    text-shadow .25s ease-in-out;
+}
+
+body #root .searchbar .suggestions .content button.suggestion {
+  font-family: var(--heading), sans-serif;
+  font-size: 1.25rem;
+  min-height: 1.75rem;
+  line-height: 100%;
+  font-weight: 600;
+  padding: .2rem .5rem;
+  color: var(--dark);
+ 
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: none;
+  outline: none;
+  background-color: transparent;
+  cursor: pointer;
+ 
+  /* Sliding fill — starts at 0 width, anchored right */
+  background-image: linear-gradient(
+    var(--dark),
+    var(--dark) 2px,
+    var(--primary) 2px,
+    var(--primary) calc(100% - 2px),
+    var(--dark) calc(100% - 2px),
+    var(--dark)
+  );
+  background-size: 0% 100%;
+  background-position: 100% 100%;
+  background-repeat: no-repeat;
+ 
+  /* Transition on base = applies in both directions (hover in AND out) */
+  transition:
+    background-size .4s ease-in-out,
+    color .25s ease-in-out,
+    text-shadow .25s ease-in-out;
+}
+ 
+/* --- HOVER & FOCUS-VISIBLE: slide the fill in from the right --- */
+body #root .searchbar .suggestions .content button:hover,
+body #root .searchbar .suggestions .content button:focus-visible,
+body #root .searchbar .suggestions .content button.active {
+  background-size: 100% 100%;
+  background-position: 0% 100%;
+  color: var(--white);
+  text-shadow:
+     2px  2px 0px var(--dark),
+    -2px -2px 0px var(--dark),
+     2px -2px 0px var(--dark),
+    -2px  2px 0px var(--dark),
+     0px  2px 0px var(--dark),
+     0px -2px 0px var(--dark),
+     2px  0px 0px var(--dark),
+    -2px  0px 0px var(--dark);
+}
+ 
+
+/* --- INPUT: font family + size to match suggestions --- */
+body #root .searchbar .input-wrapper input {
+  font-family: var(--heading), sans-serif;
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
+/* --- PLACEHOLDER: same font, slightly muted --- */
+body #root .searchbar .input-wrapper input::placeholder {
+  font-family: var(--heading), sans-serif;
+  font-size: 1.8rem;
+  color: var(--dark);
+  opacity: 0.3;
+  font-weight: 600;
+}
+body #root .searchbar {
+  position: relative;
+}
+body #root .expandable-menu.suggestions .content {
+  display: flex;
+  flex-direction: column;
+}
+body #root .expandable-menu.suggestions .content button.suggestion {
+  font-family: var(--heading), sans-serif;
+  font-size: 1.25rem;
+  min-height: 2rem;
+  line-height: 100%;
+  font-weight: 600;
+  padding: .2rem .5rem;
+  color: var(--dark);
+ 
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: none;
+  outline: none;
+  background-color: transparent;
+  cursor: pointer;
+ 
+  /* Sliding fill — starts at 0 width, anchored right */
+  background-image: linear-gradient(
+    var(--dark),
+    var(--dark) 2px,
+    var(--primary) 2px,
+    var(--primary) calc(100% - 2px),
+    var(--dark) calc(100% - 2px),
+    var(--dark)
+  );
+  background-size: 0% 100%;
+  background-position: 100% 100%;
+  background-repeat: no-repeat;
+ 
+  /* Transition on base = applies in BOTH directions (in AND out) */
+  transition:
+    background-size .4s ease-in-out,
+    color .25s ease-in-out,
+    text-shadow .25s ease-in-out;
+}
+body #root .expandable-menu.suggestions .content button.suggestion:hover,
+body #root .expandable-menu.suggestions .content button.suggestion.active {
+  background-size: 100% 100%;
+  background-position: 0% 100%;
+  color: var(--white);
+  text-shadow:
+     2px  2px 0px var(--dark),
+    -2px -2px 0px var(--dark),
+     2px -2px 0px var(--dark),
+    -2px  2px 0px var(--dark),
+     0px  2px 0px var(--dark),
+     0px -2px 0px var(--dark),
+     2px  0px 0px var(--dark),
+    -2px  0px 0px var(--dark);
 }

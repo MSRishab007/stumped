@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { HelpCircle, BarChart2, Info, History, User, X, ChevronLeft, ChevronRight,Share } from 'lucide-react';
 import SearchBar from './SearchBar'; 
 import { getDailyPlayerForDate } from '../utils/dailyPlayer';
@@ -104,6 +104,52 @@ const MainGame = () => {
   const [countdown, setCountdown] = useState('');
 
   const { guesses, status: gameStatus, usedSilhouette } = gameState;
+
+  // --- SUGGESTIONS STATE (lifted from SearchBar) ---
+  const [suggestions, setSuggestions] = useState([]);
+  const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
+  const searchBarRef = useRef(null);
+  const isOpen = suggestions.length > 0;
+  // Each result row is approx 2rem tall; cap at 300px
+  const ITEM_HEIGHT_REM = 2;
+  const suggestionsHeight = isOpen
+    ? Math.min(suggestions.length * ITEM_HEIGHT_REM, 15) + 'rem'
+    : '0px';
+
+  const handleSuggestionsChange = useCallback((newSuggestions) => {
+    setSuggestions(newSuggestions);
+    setActiveSuggestionIndex(-1);
+  }, []);
+
+  // Keyboard nav for suggestions — lives here because suggestions state is here
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (!isOpen) return;
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setActiveSuggestionIndex(prev => (prev === suggestions.length - 1 ? 0 : prev + 1));
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setActiveSuggestionIndex(prev => (prev <= 0 ? suggestions.length - 1 : prev - 1));
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (activeSuggestionIndex >= 0) {
+          handleSuggestionSelect(suggestions[activeSuggestionIndex]);
+        }
+      } else if (e.key === 'Escape') {
+        setSuggestions([]);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, suggestions, activeSuggestionIndex]);
+
+  const handleSuggestionSelect = (player) => {
+    handleGuessSubmit(player);
+    setSuggestions([]);
+    setActiveSuggestionIndex(-1);
+    searchBarRef.current?.clear();
+  };
 
   // --- RUNTIME EFFECTS ---
   // Re-sync components whenever the user switches dates on the calendar
@@ -664,7 +710,12 @@ const handleGuessSubmit = (chosenPlayer) => {
         <div className="searchbar">
           
           {/* 1. The Search Bar Component */}
-          <SearchBar onGuessSubmit={handleGuessSubmit} gameStatus={gameStatus} guessedPlayers={guesses} />
+          <SearchBar
+            ref={searchBarRef}
+            onSuggestionsChange={handleSuggestionsChange}
+            gameStatus={gameStatus}
+            guessedPlayers={guesses}
+          />
           
           {/* 2. The Right-Side Controls */}
           <div className="time-hint-wrapper">
@@ -699,6 +750,37 @@ const handleGuessSubmit = (chosenPlayer) => {
   )}
 </div>
 
+          </div>
+        </div>
+
+        {/* --- SUGGESTIONS BOX --- sits in normal flow between searchbar and guesses grid */}
+        <div
+          id="suggestions-listbox"
+          className="expandable-menu suggestions"
+          role="listbox"
+          aria-hidden={!isOpen}
+          style={{ height: suggestionsHeight }}
+        >
+          <div className="content">
+            {suggestions.map((player, idx) => {
+              const isActive = idx === activeSuggestionIndex;
+              return (
+                <button
+                  key={player.id}
+                  id={`suggestion-${idx}`}
+                  role="option"
+                  aria-label={`Submit ${player.name} as a guess`}
+                  aria-selected={isActive}
+                  data-name={player.name}
+                  className={`suggestion${isActive ? ' active' : ''}`}
+                  onClick={() => handleSuggestionSelect(player)}
+                  onMouseEnter={() => setActiveSuggestionIndex(idx)}
+                  tabIndex={isOpen ? 0 : -1}
+                >
+                  {player.name}
+                </button>
+              );
+            })}
           </div>
         </div>
         {/* --- RESULTS GRID DISPLAY MATRIX --- */}
