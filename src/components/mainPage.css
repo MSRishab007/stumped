@@ -63,7 +63,7 @@ body #root .ipl-logo-img {
   font-size: 1em;
   cursor: pointer;
 }
-.game-btn:hover,.game-btn:focus-visible,, .silhouette-btn:hover, .share-btn:hover, .return-today-btn:hover,
+.game-btn:hover,.game-btn:focus-visible, .silhouette-btn:hover, .share-btn:hover, .return-today-btn:hover,
 .game-btn:active, .silhouette-btn:active, .share-btn:active, .return-today-btn:active,
 .search-input-wrapper:focus-within {
   transform: translate(0px, 4px); 
