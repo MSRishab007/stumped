@@ -2041,3 +2041,7 @@ body #root .expandable-menu.suggestions .content button.suggestion.active {
      2px  0px 0px var(--dark),
     -2px  0px 0px var(--dark);
 }
+::selection {
+  background-color: var(--primary); /* highlight color */
+  color: var(--white);            /* selected text color */
+}
