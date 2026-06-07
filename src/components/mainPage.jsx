@@ -748,7 +748,7 @@ const handleGuessSubmit = (chosenPlayer) => {
                 {/* Map the 9 data columns */}
                 {[
                   { val: guess?.currentFranchise, res: result?.team },
-                  { val: guess?.role ? guess.role.replace(/Bowling Allrounder/gi, 'Bowling AR').replace(/Batting Allrounder/gi, 'Batting AR').replace(/Top-Order/gi, 'Top\u00A0Order').replace(/Middle-Order/gi, 'Middle\u00A0Order').replace(/Wicketkeeper/gi, 'WK').replace(/-/g, ' ') : 'Null', res: result?.role },
+                  { val: guess?.role ? guess.role.replace(/Top-Order Batter/gi, 'Top Order').replace(/Middle-Order Batter/gi, 'Middle Order').replace(/Bowling Allrounder/gi, 'Bowling AR').replace(/Batting Allrounder/gi, 'Batting AR').replace(/Top-Order/gi, 'Top\u00A0Order').replace(/Middle-Order/gi, 'Middle\u00A0Order').replace(/Wicketkeeper/gi, 'WK').replace(/-/g, ' ') : 'Null', res: result?.role },
                   { val: guess?.battingHand, res: result?.battingHand },
                   { val: evaluatedAge, res: result?.age },
                   { val: (!guess?.debutYear || guess?.debutYear === 'Unknown') ? 'NA' : guess.debutYear, res: result?.debutYear },
