@@ -7,8 +7,8 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="/play" element={<MainGame />} />
+        <Route path="/landing-page" element={<Landing />} />
+        <Route path="/" element={<MainGame />} />
         <Route path="/about" element={<div>About Page</div>} />
       </Routes>
     </BrowserRouter>

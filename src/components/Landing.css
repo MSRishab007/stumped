@@ -1,85 +1,157 @@
-.landing-wrapper {
-  width: 100vw;
+/* =========================================
+   STUMPED LANDING PAGE
+   ========================================= */
+
+/* The dotted background container */
+.interstitial-dialoge {
+  /* Safely establishing the background variables if they aren't global yet */
+  /* --dotSize: 2px;
+  --bgSize: 20px;
+  --bgPosition: 10px;
+  --biege: #f4f1eb; /* Reusing your flashback pitch color */
+  /* --biegeDark: #e5e0d8; */ */
+  
+  position: absolute;
+  top: 0;
+  left: 0;
   height: 100vh;
+  width: 100vw;
   display: flex;
+  background-color: var(--biege);
+  background-image: 
+    radial-gradient(circle at center, var(--biegeDark) var(--dotSize), transparent 0),
+    radial-gradient(circle at center, var(--biegeDark) var(--dotSize), transparent 0);
+  background-repeat: repeat;
+  background-size: var(--bgSize) var(--bgSize);
+  background-position: 0px 0px, var(--bgPosition) var(--bgPosition);
+}
+
+.interstitial-dialoge section {
+  display: flex; 
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: fit-content;
+  width: 100%;
+  max-width: 500px; /* Widened slightly to give the h2 room */
+  margin: auto;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* Image styling for when you add the logo later */
+.interstitial-dialoge section img {
+  height: 7rem;
+  width: auto;
+  margin-bottom: 15px;
+}
+
+/* Temporary 3D Text Logo */
+.interstitial-dialoge section .temp-logo {
+  font-family: "Arial Black", "Arial Bold", Gadget, sans-serif;
+  font-size: 5.5rem;
+  line-height: 0.8;
+  letter-spacing: -4px; /* Tighter letter spacing like Poeltl */
+  color: var(--white, #fff);
+  -webkit-text-stroke: 3px var(--dark, #000);
+  /* Adjusted shadow to cast Down and Right, using yellow/gold */
+  text-shadow: 
+    1px 1px 0 var(--dark, #000), 2px 2px 0 var(--dark, #000), 3px 3px 0 var(--dark, #000),
+    4px 4px 0 var(--primary, #daae4f), 5px 5px 0 var(--primary, #daae4f), 6px 6px 0 var(--primary, #daae4f), 7px 7px 0 var(--primary, #daae4f), 8px 8px 0 var(--primary, #daae4f),
+    9px 8px 0 var(--dark, #000), 8px 9px 0 var(--dark, #000), 9px 9px 0 var(--dark, #000);
+  margin: 0 0 15px 0;
+}
+
+.interstitial-dialoge section h2 {
+  font-size: 2.1rem; /* Scaled down slightly to fit */
+  font-family: var(--heading2, "Teko", sans-serif);
+  font-weight: 700; /* Bolder to match */
+  font-style: italic;
+  color: var(--dark, #000);
+  margin: .5rem 0 0 0;
+  text-align: center;
+  white-space: nowrap; /* Forces the text to stay on one single line */
+}
+.interstitial-dialoge section p {
+  font-size: 1.15rem; /* Scaled down slightly */
+  font-family: var(--heading, sans-serif);
+  font-weight: 600;
+  color: var(--dark, #000);
+  margin: .25rem 0rem 1.5rem 0rem;
+  text-align: center;
+}
+
+/* Date / Game Number Row */
+.interstitial-dialoge section > div.date {
+  display: flex;
+  flex-wrap: wrap;
+  align-self: stretch;
+  height: fit-content;
+  margin-top: 2rem;
+  justify-content: space-between;
+}
+
+.interstitial-dialoge section > div.date p {
+  margin: 0rem;
+  margin-top: .25rem;
+  color: var(--darkGrey, #666);
+  font-style: italic;
+  font-size: 1.1rem;
+}
+
+/* THE PLAY BUTTON */
+.interstitial-dialoge .button {
+  display: flex;
+  text-decoration: none;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--white, #fff);
+  color: var(--dark, #000);
+  cursor: pointer;
+  border: none; /* Strip native button border */
+  transform: translate(-4px, 0px);
+  transition: box-shadow .1s ease-in-out, transform .1s ease-in-out, background-color .1s ease-in-out;
+  overflow: hidden;
+  box-shadow: 
+    0px 0px 0px 3px var(--dark, #000),
+    1px 1px 0px 3px var(--dark, #000),
+    2px 2px 0px 3px var(--dark, #000),
+    3px 3px 0px 3px var(--dark, #000),
+    4px 4px 0px 3px var(--dark, #000);
+}
+
+.interstitial-dialoge .button:hover,
+.interstitial-dialoge .button:focus-visible {
+  transform: translate(0px, 4px);
+  box-shadow: 0px 0px 0px 3px var(--dark, #000); /* Flattens perfectly */
+}
+
+.interstitial-dialoge .button .content {
+  display: flex;
+  height: fit-content;
+  width: fit-content;
   align-items: center;
   justify-content: center;
-  background-color: #f3eee1;
-  background-image: radial-gradient(#e5e0d3 2px, transparent 2px);
-  background-size: 32px 32px;
+  padding: 0.1rem 1rem; /* Drastically reduced padding for a compact button */
+  pointer-events: none;
+  font-family: var(--heading2, "Teko", sans-serif);
+  font-weight: 500;
+  font-size: 1.7rem; /* Smaller text size */
+  line-height: 1.2;
 }
 
-.landing-content {
-  text-align: center;
-  width: 100%;
-  max-width: 1000px;
-}
-
-.stumped-logo {
-  font-family: "Arial Black", "Arial Bold", Gadget, sans-serif;
-  font-size: 120px; 
-  color: white;
-  text-transform: uppercase;
-  font-style: italic;
-  margin: 0;
-  line-height: 1;
-  letter-spacing: -6px;
-  -webkit-text-stroke: 4px black;
-  text-shadow: 
-    5px 5px 0px var(--primary), 
-    10px 10px 0px var(--primary),;
-}
-
-.main-subtext {
-  font-family: "Arial Black", sans-serif;
-  font-size: 28px;
-  font-style: italic;
-  text-transform: uppercase;
-  color: #000;
-  margin-top: 20px;
-  letter-spacing: -1px;
-}
-
-.guess-count-text {
-  font-family: Arial, sans-serif;
-  font-size: 22px;
-  font-weight: 700;
-  color: #000;
-  margin-top: 10px;
-}
-
-.button-section {
-  margin-top: 30px;
-}
-
-.play-button {
-  background-color: white;
-  border: 4px solid black;
-  padding: 8px 30px;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  box-shadow: 6px 6px 0px black;
-}
-
-.play-button:hover {
-  background-color: rgb(255, 255, 255) !important;
-  box-shadow: 0px 0px 0px rgb(255, 255, 255);
-  transform: translate(6px, 6px); 
-}
-.play-btn-text {
-  font-family: "Arial Black", sans-serif;
-  font-size: 42px;
-  color: black;
-  text-transform: uppercase;
-}
-
-.play-button:hover .play-btn-text {
-  color: rgb(0, 0, 0);
-  font-style: italic;
-}
-
-@media (max-width: 768px) {
-  .stumped-logo { font-size: 70px; -webkit-text-stroke: 2px black; text-shadow: 3px 3px 0px var(--primary), 6px 6px 0px var(--dark); }
-  .main-subtext { font-size: 22px; }
-  .play-btn-text { font-size: 30px; }
+/* Mobile Breakpoints */
+@media(max-width: 800px) {
+  .interstitial-dialoge section .temp-logo {
+    font-size: 4rem;
+  }
+  .interstitial-dialoge section h2 {
+    font-size: 2rem;
+  }
+  .interstitial-dialoge section p {
+    font-size: 1.1rem;
+  }
+  .interstitial-dialoge .button .content {
+    font-size: 1.9rem;
+  }
 }

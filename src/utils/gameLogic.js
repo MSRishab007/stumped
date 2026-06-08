@@ -1,4 +1,4 @@
-futureYear = new Date().getFullYear() + 1; // Used for non-numeric debut years (e.g. "Unknown")
+const futureYear = new Date().getFullYear() + 1; // Used for non-numeric debut years (e.g. "Unknown")
 
 const ROLE_PROXIMITY = {
   'top order batter': ['middle order batter', 'wicketkeeper batter', 'batting allrounder'],
