@@ -111,7 +111,7 @@ import csv
 import os 
 
 # 1. Read the local HTML file we saved from Chrome
-with open('test.html', 'r', encoding='utf-8') as f:
+with open("scripts/test.html", 'r', encoding='utf-8') as f:
     html_content = f.read()
 
 # 2. Parse it with BeautifulSoup

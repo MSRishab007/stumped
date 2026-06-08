@@ -1,85 +1,48 @@
-// scripts/testStateEngine.js
-import { comparePlayers } from '../src/utils/gameLogic.js';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { getGuessResult } from '../src/utils/gameLogic.js';
 
-// Mocking LocalStorage inside our Node testing environment
-const mockLocalStorage = {};
-const localStorage = {
-  getItem: (key) => mockLocalStorage[key] || null,
-  setItem: (key, value) => { mockLocalStorage[key] = String(value); },
-};
+// Setup paths for ES Modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-// Test Configuration Simulation Parameters
-const todayStr = "2026-05-24";
-const yesterdayStr = "2026-05-23";
+// 1. Load your actual JSON database safely
+const jsonPath = path.join(__dirname, '../src/data/players.json'); // Adjust name to player.json if needed
+const playersData = JSON.parse(fs.readFileSync(jsonPath, 'utf-8'));
 
-const targetPlayerToday = { id: 3, name: "MS Dhoni", currentTeam: "CSK" };
-const targetPlayerYesterday = { id: 5, name: "Sarfaraz Khan", currentTeam: "CSK" };
+function runRealDataTest() {
+    console.log(`📦 Loaded ${playersData.length} players from database.\n`);
 
-// Global Initial Stats Mock Tracker
-let globalStats = { gamesPlayed: 0, gamesWon: 0, currentStreak: 0, maxStreak: 0 };
+    // 2. Find the target player (e.g., Ruturaj Gaikwad)
+    const targetName = "Virat Kohli";
+    const targetPlayer = playersData.find(p => p.name.toLowerCase() === targetName.toLowerCase());
 
-function updateDailyStatistics(isVictory, activeDate) {
-  // PROTECTION: Only log to streaks if this is today's live puzzle!
-  if (activeDate !== todayStr) return;
+    // 3. Find the guessed player (e.g., Dewald Brevis)
+    const guessName = "MS Dhoni";
+    const guessPlayer = playersData.find(p => p.name.toLowerCase() === guessName.toLowerCase());
 
-  globalStats.gamesPlayed += 1;
-  if (isVictory) {
-    globalStats.currentStreak += 1;
-    globalStats.gamesWon += 1;
-    globalStats.maxStreak = Math.max(globalStats.currentStreak, globalStats.maxStreak);
-  } else {
-    globalStats.currentStreak = 0;
-  }
-  localStorage.setItem('ipl-legends-statistics', JSON.stringify(globalStats));
+    if (!targetPlayer || !guessPlayer) {
+        console.error("❌ Could not find one or both players in the JSON. Check the spelling!");
+        return;
+    }
+
+    console.log(`🎯 TARGET PLAYER: ${targetPlayer.name} (${targetPlayer.currentFranchise})`);
+    console.log(`🤔 GUESS PLAYER: ${guessPlayer.name} (${guessPlayer.currentFranchise})\n`);
+
+    // 4. Run the Engine
+    console.log("⚙️  Running Comparison Engine...\n");
+    const result = getGuessResult(guessPlayer, targetPlayer);
+
+    // 5. Output the logic matrix
+    console.dir(result, { depth: null, colors: true });
+
+    // 6. Basic sanity checks based on your rules
+    console.log("\n📊 Quick Sanity Check:");
+    console.log(`Team Status: ${result.team.status === 'exact' ? '✅ Exact' : '❌ Failed (Should be exact for CSK)'}`);
+    console.log(`Batting Hand: ${result.battingHand.status === 'exact' ? '✅ Exact' : '❌ Failed'}`);
+    console.log(`Wickets Status: ${result.wickets.status} (Delta is ${Math.abs(guessPlayer.wickets - targetPlayer.wickets)}, threshold is 5)`);
+    console.log(`Age Direction: ${result.age.direction} (Target DOB: ${targetPlayer.dob}, Guess DOB: ${guessPlayer.dob})`);
 }
 
-// ========================================================
-// RUN INTEGRATION TEST SIMULATION
-// ========================================================
-console.log("\n==================================================");
-console.log("  RUNNING STATE MACHINE INTEGRATION TESTS");
-console.log("==================================================\n");
-
-// --- TEST 1: PLAYING TODAY'S LIVE MATCH ---
-console.log("👉 [ACTION]: Simulating 3 guesses on Today's Live Board...");
-let guessesToday = [
-  { name: "Ruturaj Gaikwad" },
-  { name: "Dewald Brevis" },
-  { name: "MS Dhoni" } // Winning match guess
-];
-
-let finalGuessToday = guessesToday[guessesToday.length - 1];
-let evaluationToday = finalGuessToday.name === targetPlayerToday.name;
-
-if (evaluationToday) {
-  updateDailyStatistics(true, todayStr);
-  localStorage.setItem(`ipl-legends-game-${todayStr}`, JSON.stringify({ date: todayStr, gameStatus: 'won', guesses: guessesToday }));
-}
-
-console.log("✅ TODAY'S BOARD STATE SAVED:", localStorage.getItem(`ipl-legends-game-${todayStr}`) !== null);
-console.log("📊 STATS AFTER TODAY'S WIN:", JSON.stringify(globalStats));
-
-console.log("\n──────────────────────────────────────────────────\n");
-
-// --- TEST 2: PLAYING YESTERDAY'S ARCHIVE MATCH ---
-console.log("👉 [ACTION]: Switching to Yesterday's Archive Board...");
-console.log("👉 [ACTION]: Simulating a Loss (8 incorrect guesses)...");
-
-let guessesYesterday = Array(8).fill({ name: "Ruturaj Gaikwad" }); // 8 wrong guesses
-let evaluationYesterday = false; // Player lost
-
-updateDailyStatistics(evaluationYesterday, yesterdayStr);
-localStorage.setItem(`ipl-legends-game-${yesterdayStr}`, JSON.stringify({ date: yesterdayStr, gameStatus: 'lost', guesses: guessesYesterday }));
-
-console.log("✅ ARCHIVE BOARD STATE SAVED:", localStorage.getItem(`ipl-legends-game-${yesterdayStr}`) !== null);
-console.log("🛑 STATS AFTER ARCHIVE LOSS (Should look identical to above):", JSON.stringify(globalStats));
-
-// --- FINAL VERIFICATION VERDICT ---
-console.log("\n==================================================");
-if (globalStats.currentStreak === 1 && mockLocalStorage[`ipl-legends-game-${yesterdayStr}`]) {
-  console.log("        🏆 INTEGRATION VERDICT: PASSED! 🏆");
-  console.log(" Streak protection and file isolation working perfectly.");
-} else {
-  console.log("        ❌ INTEGRATION VERDICT: FAILED! ❌");
-}
-console.log("==================================================\n");
+runRealDataTest();
