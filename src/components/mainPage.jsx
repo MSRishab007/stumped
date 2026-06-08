@@ -365,9 +365,9 @@ const handleGuessSubmit = (chosenPlayer) => {
 
             // Streak continues only if yesterday was also played (won or lost)
             // A skipped day breaks the streak just like a loss does
-            const yesterday = new Date(activeDate);
-            yesterday.setDate(yesterday.getDate() - 1);
-            const yStr = yesterday.toISOString().slice(0, 10);
+            const yesterdayDate = new Date(activeDate);
+            yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+            const yStr = `${yesterdayDate.getFullYear()}-${String(yesterdayDate.getMonth() + 1).padStart(2, '0')}-${String(yesterdayDate.getDate()).padStart(2, '0')}`;
             const playedYesterday = !!newStats.history[yStr];
 
             if (playedYesterday) {
