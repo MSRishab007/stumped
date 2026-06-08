@@ -59,7 +59,7 @@
     1px 1px 0 var(--dark, #000), 2px 2px 0 var(--dark, #000), 3px 3px 0 var(--dark, #000),
     4px 4px 0 var(--primary, #daae4f), 5px 5px 0 var(--primary, #daae4f), 6px 6px 0 var(--primary, #daae4f), 7px 7px 0 var(--primary, #daae4f), 8px 8px 0 var(--primary, #daae4f),
     9px 8px 0 var(--dark, #000), 8px 9px 0 var(--dark, #000), 9px 9px 0 var(--dark, #000);
-  margin: 0 0 15px 0;
+  margin: 1rem ;
 }
 
 .interstitial-dialoge section h2 {
@@ -73,11 +73,11 @@
   white-space: nowrap; /* Forces the text to stay on one single line */
 }
 .interstitial-dialoge section p {
-  font-size: 1.15rem; /* Scaled down slightly */
+  font-size: 1.4rem; /* Increased from 1.15rem to make it punchy */
   font-family: var(--heading, sans-serif);
   font-weight: 600;
   color: var(--dark, #000);
-  margin: .25rem 0rem 1.5rem 0rem;
+  margin: 0.2rem 0rem 1rem 0rem; 
   text-align: center;
 }
 
@@ -87,8 +87,10 @@
   flex-wrap: wrap;
   align-self: stretch;
   height: fit-content;
-  margin-top: 2rem;
-  justify-content: space-between;
+  margin-top: 1.5rem;
+  justify-content: center;
+  width: 100%;
+  gap: 15rem;
 }
 
 .interstitial-dialoge section > div.date p {
@@ -135,9 +137,9 @@
   padding: 0.1rem 1rem; /* Drastically reduced padding for a compact button */
   pointer-events: none;
   font-family: var(--heading2, "Teko", sans-serif);
-  font-weight: 500;
+  font-weight: 400;
   font-size: 1.7rem; /* Smaller text size */
-  line-height: 1.2;
+  line-height: 1;
 }
 
 /* Mobile Breakpoints */
@@ -149,7 +151,7 @@
     font-size: 2rem;
   }
   .interstitial-dialoge section p {
-    font-size: 1.1rem;
+    font-size: 1.25rem;
   }
   .interstitial-dialoge .button .content {
     font-size: 1.9rem;
