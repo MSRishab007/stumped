@@ -1,3 +1,5 @@
+futureYear = new Date().getFullYear() + 1; // Used for non-numeric debut years (e.g. "Unknown")
+
 const ROLE_PROXIMITY = {
   'top order batter': ['middle order batter', 'wicketkeeper batter', 'batting allrounder'],
   'middle order batter': ['top order batter', 'wicketkeeper batter', 'batting allrounder'],
@@ -24,26 +26,32 @@ const calculateAge = (dobString) => {
 
 // Helper: Evaluate numeric stats
 const compareNumeric = (guessVal, targetVal, threshold) => {
-  // Handle non-numeric edge cases (e.g., "Retained", "Unknown")
-  if (isNaN(guessVal) || isNaN(targetVal)) {
+  const g = Number(guessVal);
+  const t = Number(targetVal);
+
+  // If either value is non-numeric after coercion (undefined, null, "Unknown", "Retained" etc.)
+  if (isNaN(g) || isNaN(t)) {
     return {
       status: String(guessVal).toLowerCase() === String(targetVal).toLowerCase() ? 'exact' : 'wrong',
       direction: 'none'
     };
   }
 
-  const g = Number(guessVal);
-  const t = Number(targetVal);
-  
   let status = 'wrong';
   if (g === t) status = 'exact';
   else if (Math.abs(g - t) <= threshold) status = 'partial';
 
   let direction = 'none';
-  if (t > g) direction = 'up';   // Target is higher
-  else if (t < g) direction = 'down'; // Target is lower
+  if (t > g) direction = 'up';
+  else if (t < g) direction = 'down';
 
   return { status, direction };
+};
+
+// Helper: Resolve debutYear — non-numeric values (e.g. "Unknown") treated as 2027 (future year)
+const resolveDebutYear = (val) => {
+  const n = Number(val);
+  return isNaN(n) ? futureYear : n;
 };
 
 // Helper: Clean roles to match proximity dictionary (e.g. "Top-Order Batter" -> "top order batter")
@@ -61,7 +69,7 @@ export function getGuessResult(guess, target) {
     strikeRate: compareNumeric(guess.strikeRate, target.strikeRate, 5),
     wickets: compareNumeric(guess.wickets, target.wickets, 5),
     economy: compareNumeric(guess.economy, target.economy, 0.5),
-    debutYear: compareNumeric(guess.debutYear, target.debutYear, 2),
+    debutYear: compareNumeric(resolveDebutYear(guess.debutYear), resolveDebutYear(target.debutYear), 2),
     auctionPrice: compareNumeric(guess.auctionPrice, target.auctionPrice, 100),
     age: compareNumeric(calculateAge(guess.dob), calculateAge(target.dob), 2),
   };

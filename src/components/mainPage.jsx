@@ -362,8 +362,19 @@ const handleGuessSubmit = (chosenPlayer) => {
           
           if (newStatus === 'won') {
             newStats.gamesWon += 1;
-            // Increment streaks (already guarded by activeDate === realTodayStr check above)
-            newStats.currentStreak += 1;
+
+            // Streak continues only if yesterday was also played (won or lost)
+            // A skipped day breaks the streak just like a loss does
+            const yesterday = new Date(activeDate);
+            yesterday.setDate(yesterday.getDate() - 1);
+            const yStr = yesterday.toISOString().slice(0, 10);
+            const playedYesterday = !!newStats.history[yStr];
+
+            if (playedYesterday) {
+              newStats.currentStreak += 1;
+            } else {
+              newStats.currentStreak = 1; // restart — day was skipped
+            }
             newStats.maxStreak = Math.max(newStats.maxStreak, newStats.currentStreak);
           } else {
             // Reset streak on loss
