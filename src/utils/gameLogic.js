@@ -67,14 +67,15 @@ export function getGuessResult(guess, target) {
   };
 
   // --- TEAM LOGIC ---
+  // Fields in players.json: currentFranchise (string), pastTeams (array)
   let teamStatus = 'wrong';
-  
+
   if (guess.currentFranchise === target.currentFranchise) {
-    // Exactly the same current team
+    // Same current team → exact (green)
     teamStatus = 'exact';
   } else if (
-    // Guessed player's current team is one of the target's old teams
-    (target.pastFranchises && target.pastFranchises.includes(guess.currentFranchise)) 
+    // Guessed player's current team was in the target's past teams → partial (yellow)
+    Array.isArray(target.pastTeams) && target.pastTeams.includes(guess.currentFranchise)
   ) {
     teamStatus = 'partial';
   }

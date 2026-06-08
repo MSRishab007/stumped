@@ -108,8 +108,10 @@ const MainGame = () => {
   // --- SUGGESTIONS STATE (lifted from SearchBar) ---
   const [suggestions, setSuggestions] = useState([]);
   const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const searchBarRef = useRef(null);
-  const isOpen = suggestions.length > 0;
+  const suggestionsRef = useRef(null);
+  const isOpen = suggestions.length > 0 && isSearchFocused;
   // Each result row is approx 2rem tall; cap at 300px
   const ITEM_HEIGHT_REM = 2;
   const suggestionsHeight = isOpen
@@ -707,7 +709,24 @@ const handleGuessSubmit = (chosenPlayer) => {
       </div>
 
         {/* --- MAIN GAMEPLAY ROW (SEARCH, SILHOUETTE, TIMER) --- */}
-        <div className="searchbar">
+        <div
+          className="searchbar"
+          onFocus={() => setIsSearchFocused(true)}
+          onBlur={(e) => {
+            // Only hide if focus leaves the entire searchbar+suggestions area
+            const next = e.relatedTarget;
+            if (!e.currentTarget.contains(next) && !suggestionsRef.current?.contains(next)) {
+              setIsSearchFocused(false);
+            }
+          }}
+          onMouseEnter={() => setIsSearchFocused(true)}
+          onMouseLeave={(e) => {
+            // Only hide if mouse isn't moving into the suggestions box
+            if (!suggestionsRef.current?.contains(e.relatedTarget)) {
+              setIsSearchFocused(false);
+            }
+          }}
+        >
           
           {/* 1. The Search Bar Component */}
           <SearchBar
@@ -756,10 +775,19 @@ const handleGuessSubmit = (chosenPlayer) => {
         {/* --- SUGGESTIONS BOX --- sits in normal flow between searchbar and guesses grid */}
         <div
           id="suggestions-listbox"
+          ref={suggestionsRef}
           className="expandable-menu suggestions"
           role="listbox"
           aria-hidden={!isOpen}
           style={{ height: suggestionsHeight }}
+          onMouseEnter={() => setIsSearchFocused(true)}
+          onMouseLeave={(e) => {
+            const next = e.relatedTarget;
+            const searchbarEl = suggestionsRef.current?.previousElementSibling;
+            if (!searchbarEl?.contains(next)) {
+              setIsSearchFocused(false);
+            }
+          }}
         >
           <div className="content">
             {suggestions.map((player, idx) => {
