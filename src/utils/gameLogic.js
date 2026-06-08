@@ -5,9 +5,9 @@ const ROLE_PROXIMITY = {
   'middle order batter': ['top order batter', 'wicketkeeper batter', 'batting allrounder'],
   'wicketkeeper batter': ['top order batter', 'middle order batter'],
   'batting allrounder': ['top order batter', 'middle order batter', 'bowling allrounder'],
-  'bowling allrounder': ['batting allrounder', 'spin bowler', 'pace bowler'],
-  'spin bowler': ['bowling allrounder', 'pace bowler'],
-  'pace bowler': ['bowling allrounder', 'spin bowler']
+  'bowling allrounder': ['batting allrounder', 'spinner', 'pacer'],
+  'spinner': ['bowling allrounder', 'pacer'],
+  'pacer': ['bowling allrounder', 'spinner']
 };
 
 // Helper: Calculate age from "DD-MM-YYYY"
