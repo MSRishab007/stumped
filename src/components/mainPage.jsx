@@ -108,8 +108,10 @@ const MainGame = () => {
   // --- SUGGESTIONS STATE (lifted from SearchBar) ---
   const [suggestions, setSuggestions] = useState([]);
   const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const searchBarRef = useRef(null);
-  const isOpen = suggestions.length > 0;
+  const suggestionsRef = useRef(null);
+  const isOpen = suggestions.length > 0 && isSearchFocused;
   // Each result row is approx 2rem tall; cap at 300px
   const ITEM_HEIGHT_REM = 2;
   const suggestionsHeight = isOpen
@@ -285,40 +287,42 @@ const MainGame = () => {
 const handleShare = () => {
     const gameNum = getGameNumber(activeDate);
     const attemptCount = gameStatus === 'won' ? guesses.length : 'X';
-    
-    // Header
-    let shareText = `Stumped #${gameNum} - ${attemptCount}/${MAX_GUESSES}\n\n`;
+    const timeUsed = seconds;
+    const mins = Math.floor(timeUsed / 60);
+    const secs = String(timeUsed % 60).padStart(2, '0');
 
+    // Header line
+    let shareText = `🏏 Stumped #${gameNum} — ${attemptCount}/${MAX_GUESSES}\n`;
+
+    // Result metadata
+    shareText += gameStatus === 'won' ? `✅ Won in ${mins}m ${secs}s` : `❌ Lost`;
+    shareText += ` | 🔥 Streak: ${stats.currentStreak}`;
+    shareText += usedSilhouette ? ` | 👁️ Silhouette used` : ``;
+    shareText += `\n\n`;
+
+    // Emoji grid
     guesses.forEach(guess => {
       const result = getGuessResult(guess, targetPlayer);
-      
       const getEmoji = (status) => status === 'exact' ? '🟩' : status === 'partial' ? '🟨' : '⬛';
-      
-      let row = '';
-      
-      // Only append the color blocks, no arrows!
-      row += getEmoji(result.team.status);
-      row += getEmoji(result.role.status);
-      row += getEmoji(result.battingHand.status);
-      row += getEmoji(result.age.status);
-      row += getEmoji(result.debutYear.status);
-      row += getEmoji(result.auctionPrice.status);
-      row += getEmoji(result.matches.status);
-      row += getEmoji(result.runs.status);
-      row += getEmoji(result.wickets.status);
-
-      shareText += row + '\n';
+      shareText += getEmoji(result.team.status);
+      shareText += getEmoji(result.role.status);
+      shareText += getEmoji(result.battingHand.status);
+      shareText += getEmoji(result.age.status);
+      shareText += getEmoji(result.debutYear.status);
+      shareText += getEmoji(result.auctionPrice.status);
+      shareText += getEmoji(result.matches.status);
+      shareText += getEmoji(result.runs.status);
+      shareText += getEmoji(result.wickets.status);
+      shareText += '\n';
     });
 
-    // Append Site URL
     shareText += '\nhttps://stumped-seven.vercel.app/';
 
-    // Write to clipboard API
     navigator.clipboard.writeText(shareText).then(() => {
       setCopySuccess(true);
       setTimeout(() => setCopySuccess(false), 2000);
     }).catch(err => {
-      console.error("Failed to copy text: ", err);
+      console.error('Failed to copy text: ', err);
     });
   };
   // --- GAME CONCLUSION & ACCUMULATION ENGINE ---
@@ -360,8 +364,19 @@ const handleGuessSubmit = (chosenPlayer) => {
           
           if (newStatus === 'won') {
             newStats.gamesWon += 1;
-            // Increment streaks (already guarded by activeDate === realTodayStr check above)
-            newStats.currentStreak += 1;
+
+            // Streak continues only if yesterday was also played (won or lost)
+            // A skipped day breaks the streak just like a loss does
+            const yesterdayDate = new Date(activeDate);
+            yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+            const yStr = `${yesterdayDate.getFullYear()}-${String(yesterdayDate.getMonth() + 1).padStart(2, '0')}-${String(yesterdayDate.getDate()).padStart(2, '0')}`;
+            const playedYesterday = !!newStats.history[yStr];
+
+            if (playedYesterday) {
+              newStats.currentStreak += 1;
+            } else {
+              newStats.currentStreak = 1; // restart — day was skipped
+            }
             newStats.maxStreak = Math.max(newStats.maxStreak, newStats.currentStreak);
           } else {
             // Reset streak on loss
@@ -671,35 +686,128 @@ const handleGuessSubmit = (chosenPlayer) => {
         </div>
 
         {/* --- 4. ABOUT --- */}
-        <div className={`about row ${activeModal === 'about' ? '' : 'closed'}`}>
-          <div className={`expandable-menu ${activeModal === 'about' ? '' : 'closed'}`}>
-            <div className="content">
-              <h3>About STUMPED</h3>
-              <p>A pure, database-driven cricket challenge built explicitly for passionate IPL fans everywhere.</p>
-            </div>
-          </div>
-        </div>
+<div className={`about row ${activeModal === 'about' ? '' : 'closed'}`}>
+  <div className={`expandable-menu ${activeModal === 'about' ? '' : 'closed'}`}>
+    <div className="content" style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+      <h3>About STUMPED</h3>
+      
+      <p>A Wordle-inspired cricket challenge built explicitly for passionate IPL fans everywhere.</p>
+      
+      <div className="about-extras" style={{ fontSize: '1.1rem', lineHeight: '1.4' }}>
+        <p><strong>Created by:</strong> Stumped</p>
+        <p><strong>Data:</strong> Player stats are updated as of the 2026 IPL season.</p>
+        <p><strong>Inspired by:</strong> The brilliant NBA guessing game, <a href="https://poeltl.nbpa.com/" target="_blank" rel="noreferrer" style={{ color: 'var(--dark)', textDecoration: 'underline' }}>Poeltl</a>.</p>
+        <p><strong>Feedback:</strong> Found a bug or missing player? <a href="mailto:abc@example.com" style={{ color: 'var(--dark)', textDecoration: 'underline' }}>Let us know!</a></p>
+      </div>
+
+      {/* Version Number at the very bottom */}
+      <div className="about-footer" style={{ marginTop: '10px', textAlign: 'center' }}>
+        <small style={{ color: '#888', fontFamily: 'sans-serif', fontSize: '0.8rem' }}>
+          v{__APP_VERSION__}
+        </small>
+      </div>
+
+    </div>
+  </div>
+</div>
 
         {/* --- 5. SILHOUETTE / FINAL REVEAL --- */}
         {targetPlayer?.imageLink && (
-          <div className={`hint row ${activeModal === 'silhouette' ? '' : 'closed'}`}>
-            <div className={`expandable-menu ${activeModal === 'silhouette' ? '' : 'closed'}`}>
-              <div className="content" style={{ textAlign: 'center' }}>
-                {gameStatus === 'playing' ? (
-                  <>
-                    <h3 style={{ borderBottom: '2px dashed var(--dark)', paddingBottom: '10px' }}>Mystery Player</h3>
-                    <img src={targetPlayer.imageLink} alt="Silhouette" style={{ filter: 'brightness(0)', maxHeight: '250px', marginTop: '15px' }} />
-                  </>
-                ) : (
-                  <>
-                    <h3 style={{ borderBottom: '2px dashed var(--dark)', paddingBottom: '10px' }}>{targetPlayer.name}</h3>
-                    <img src={targetPlayer.imageLink} alt={targetPlayer.name} style={{ maxHeight: '250px', marginTop: '15px' }} />
-                    <button className={`button game-btn ${copySuccess ? 'activated' : ''}`} onClick={handleShare} style={{ marginTop: '20px' }}>
-                      <div className="content"><label>{copySuccess ? 'Copied!' : 'Share Results'}</label></div>
-                    </button>
-                  </>
-                )}
+          <div className={`hint row reveal ${activeModal === 'silhouette' ? '' : 'closed'}`}>
+
+            {/* player-data: headshot + stats — matches Poeltl's .player-data */}
+            <div className={`expandable-menu player-data ${activeModal === 'silhouette' ? '' : 'closed'}`}
+              aria-hidden={activeModal !== 'silhouette'}
+              aria-label="Mystery Player's Stats"
+            >
+              <div className="content">
+
+                {/* Headshot */}
+                <div className="headshot">
+                  {gameStatus === 'playing' ? (
+                    <img
+                      src={targetPlayer.imageLink}
+                      alt="Mystery Player silhouette"
+                      style={{ filter: 'brightness(0)' }}
+                    />
+                  ) : (
+                    <img
+                      src={targetPlayer.imageLink}
+                      alt={`Headshot of ${targetPlayer.name}`}
+                    />
+                  )}
+                </div>
+
+                {/* Data */}
+                <div className="data">
+                  <p>Today's Player is...</p>
+                  {gameStatus !== 'playing' && <h3>{targetPlayer.name}</h3>}
+                  {gameStatus !== 'playing' && (
+                    <>
+                      <h5><label>Team</label> {targetPlayer.currentFranchise ?? '—'}</h5>
+                      <h5><label>Role</label> {targetPlayer.role ?? '—'}</h5>
+                      <h5><label>Batting</label> {targetPlayer.battingHand ?? '—'}</h5>
+                      <h5><label>Debut</label> {targetPlayer.debutYear ?? '—'}</h5>
+                      <h5><label>Matches</label> {targetPlayer.matches ?? '—'}</h5>
+                    </>
+                  )}
+                </div>
+
               </div>
+            </div>
+
+            {/* Right column: result card + buttons — matches Poeltl's .column */}
+            <div className="column">
+
+              {/* Result card — closed during play */}
+              <div
+                className={`expandable-menu time ${gameStatus !== 'playing' ? '' : 'closed'}`}
+                aria-hidden={gameStatus === 'playing'}
+                aria-label="Today's Game Results"
+              >
+                <div className="content">
+                  <h3>{gameStatus === 'won' ? 'You won!' : gameStatus === 'lost' ? 'Oh no, Dhoni was behind the stumps!' : ''}</h3>
+                  {gameStatus === 'won' && (
+                    <h5><span>You got it in... </span>{guesses.length} guess{guesses.length !== 1 ? 'es' : ''}</h5>
+                  )}
+                  {gameStatus === 'lost' && (
+                    <h5><span>Better luck tomorrow</span></h5>
+                  )}
+                  <h5><label>Current Streak</label> {stats.currentStreak}</h5>
+                  <h5>
+                    <label>Time Used</label>{' '}
+                    {Math.floor(seconds / 60)}m {String(seconds % 60).padStart(2, '0')}s
+                  </h5>
+                  <h5><label>Silhouette Used</label> {usedSilhouette ? 'Yes' : 'No'}</h5>
+                </div>
+              </div>
+
+              {/* Share + Close buttons — inside expandable-menu so they hide when reveal is closed */}
+              <div className={`expandable-menu row ${activeModal === 'silhouette' ? '' : 'closed'}`}>
+                <button
+                  className="button horizontal-button"
+                  role="button"
+                  aria-label="Share Today's Game"
+                  onClick={handleShare}
+                >
+                  <div className="content">
+                    <Share size={20} />
+                    <label>{copySuccess ? 'Copied!' : 'Share'}</label>
+                  </div>
+                </button>
+                <button
+                  className="button horizontal-button"
+                  role="button"
+                  aria-label="Close Reveal Menu"
+                  onClick={() => setActiveModal(null)}
+                >
+                  <div className="content">
+                    <X size={20} />
+                    <label>Close</label>
+                  </div>
+                </button>
+              </div>
+
             </div>
           </div>
         )}
@@ -707,7 +815,17 @@ const handleGuessSubmit = (chosenPlayer) => {
       </div>
 
         {/* --- MAIN GAMEPLAY ROW (SEARCH, SILHOUETTE, TIMER) --- */}
-        <div className="searchbar">
+        <div
+          className="searchbar"
+          onFocus={() => setIsSearchFocused(true)}
+          onBlur={(e) => {
+            // Only hide if focus leaves the entire searchbar+suggestions area
+            const next = e.relatedTarget;
+            if (!e.currentTarget.contains(next) && !suggestionsRef.current?.contains(next)) {
+              setIsSearchFocused(false);
+            }
+          }}
+        >
           
           {/* 1. The Search Bar Component */}
           <SearchBar
@@ -756,10 +874,12 @@ const handleGuessSubmit = (chosenPlayer) => {
         {/* --- SUGGESTIONS BOX --- sits in normal flow between searchbar and guesses grid */}
         <div
           id="suggestions-listbox"
+          ref={suggestionsRef}
           className="expandable-menu suggestions"
           role="listbox"
           aria-hidden={!isOpen}
           style={{ height: suggestionsHeight }}
+          onMouseEnter={() => setIsSearchFocused(true)}
         >
           <div className="content">
             {suggestions.map((player, idx) => {

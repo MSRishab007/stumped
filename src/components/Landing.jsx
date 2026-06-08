@@ -5,30 +5,41 @@ import './Landing.css';
 const Landing = () => {
   const navigate = useNavigate();
 
+  // Dynamically calculate the date and game number
+  const getTodayStr = () => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  };
+  
+  const getGameNumber = () => {
+    const LAUNCH_DATE = new Date(2026, 2, 24); // March 24, 2026
+    const diffTime = new Date() - LAUNCH_DATE;
+    return Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+  };
+
   return (
-    <div className="landing-wrapper">
-      <div className="landing-content">
+    <article className="interstitial-dialoge">
+      <section>
         
-        <div className="logo-section">
-          <h1 className="stumped-logo">Stumped</h1>
+        {/* Replace this H1 with an <img> tag later when you have your SVG */}
+        <h1 className="temp-logo">Stumped</h1>
+        
+        <h2>The IPL Player Guessing Game</h2>
+        <p>Guess the mystery player in 7 guesses!</p>
+        
+        {/* The Poeltl 3D Button */}
+        <button className="button" onClick={() => navigate('../')}>
+          <div className="content">Play</div>
+        </button>
+        
+        {/* Footer Data */}
+        <div className="date">
+          <p>{getTodayStr()}</p>
+          <p>No. {getGameNumber()}</p>
         </div>
 
-        <div className="text-section">
-          <h2 className="main-subtext">The IPL Legend Guessing Game</h2>
-          <p className="guess-count-text">Guess the mystery player in 7 guesses!</p>
-        </div>
-
-        <div className="button-section">
-          <button 
-            onClick={() => navigate('/play')}
-            className="play-button"
-          >
-            <span className="play-btn-text">Play</span>
-          </button>
-        </div>
-
-      </div>
-    </div>
+      </section>
+    </article>
   );
 };
 
