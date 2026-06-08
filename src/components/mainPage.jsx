@@ -719,13 +719,6 @@ const handleGuessSubmit = (chosenPlayer) => {
               setIsSearchFocused(false);
             }
           }}
-          onMouseEnter={() => setIsSearchFocused(true)}
-          onMouseLeave={(e) => {
-            // Only hide if mouse isn't moving into the suggestions box
-            if (!suggestionsRef.current?.contains(e.relatedTarget)) {
-              setIsSearchFocused(false);
-            }
-          }}
         >
           
           {/* 1. The Search Bar Component */}
@@ -781,13 +774,6 @@ const handleGuessSubmit = (chosenPlayer) => {
           aria-hidden={!isOpen}
           style={{ height: suggestionsHeight }}
           onMouseEnter={() => setIsSearchFocused(true)}
-          onMouseLeave={(e) => {
-            const next = e.relatedTarget;
-            const searchbarEl = suggestionsRef.current?.previousElementSibling;
-            if (!searchbarEl?.contains(next)) {
-              setIsSearchFocused(false);
-            }
-          }}
         >
           <div className="content">
             {suggestions.map((player, idx) => {
