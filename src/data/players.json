@@ -11414,7 +11414,9 @@
         "id": "594322",
         "name": "Corbin Bosch",
         "currentFranchise": "MI",
-        "pastTeams": [],
+        "pastTeams": [
+            "RR"
+        ],
         "dob": "10-09-1994",
         "role": "Bowling Allrounder",
         "auctionPrice": 75,
