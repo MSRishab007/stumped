@@ -2173,145 +2173,328 @@ body #root .result-meta-value {
   color: var(--dark);
 }
  
- 
-/* =====================================================
-   REVEAL MODAL — matches Poeltl's .reveal structure
-   .reveal > .player-data + .column > (.time + .row)
+ /* =====================================================
+   REVEAL MODAL (POELTL ID-CARD LAYOUT)
    ===================================================== */
- 
+
 /* Outer reveal row */
 body #root .top-menu .reveal {
   display: flex;
   flex-direction: row;
   align-items: flex-start;
+  justify-content: center;
   flex-wrap: wrap;
   gap: 0;
+  padding: 6px; /* CRITICAL FIX: prevents the 3D transform from being clipped */
+  transition: max-height 0.3s ease-in-out, margin 0.2s ease-in-out, opacity 0.2s ease-in-out;
+  max-height: 1500px; /* Bumped up to ensure mobile stacking fits */
+  overflow: hidden;
 }
- 
-/* player-data: headshot + stats */
+/* --- THE CRITICAL FIX: Hides the entire row (including buttons) instantly --- */
+body #root .top-menu .reveal.closed {
+  max-height: 0px !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Player Data Card (ID Card Style) */
+body #root .top-menu .reveal .player-data {
+  width: 360px; 
+  max-width: 100%;
+  background-color: var(--white);
+  border: none;
+  
+  box-shadow: 
+    0px 0px 0px 3px var(--dark), 
+    1px 1px 0px 3px var(--dark), 
+    2px 2px 0px 3px var(--dark), 
+    3px 3px 0px 3px var(--dark), 
+    4px 4px 0px 3px var(--dark);
+    
+  transform: translate(-4px, -4px);
+}
+
 body #root .top-menu .reveal .player-data .content {
-  flex-wrap: wrap;
-  width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 0; 
 }
- 
+
+/* Headshot Area (White Background) */
 body #root .top-menu .reveal .player-data .content .headshot {
-  flex: 0 0 auto;
+  width: 100%;
+  height: 260px; 
+  background: linear-gradient(
+    to right, 
+    #eaeaea 22%, 
+    var(--white) 22%, 
+    var(--white) 78%, 
+    #eaeaea 78%
+  ); 
+  
+  position: relative;
+  display: flex;
+  justify-content: center;
+  border-bottom: 2px solid var(--dark);
 }
- 
+
+/* Mid-Game Silhouette override */
+body #root .top-menu .reveal .player-data .content .headshot.only-silhouette {
+  background-color: var(--grey); 
+  border-bottom: none;
+  height: 290px;
+}
+
+/* Poeltl's signature dashed lines behind the player */
+body #root .top-menu .reveal .player-data .content .headshot::before,
+body #root .top-menu .reveal .player-data .content .headshot::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  border-left: 2px dashed var(--dark);
+  z-index: 1;
+}
+body #root .top-menu .reveal .player-data .content .headshot::before { left: 20%; }
+body #root .top-menu .reveal .player-data .content .headshot::after { right: 20%; }
+
+/* Hide dashed lines during mid-game silhouette */
+body #root .top-menu .reveal .player-data .content .headshot.only-silhouette::before,
+body #root .top-menu .reveal .player-data .content .headshot.only-silhouette::after {
+  display: none;
+}
+
 body #root .top-menu .reveal .player-data .content .headshot img {
-  max-height: 250px;
+  height: 100%;
   width: auto;
   object-fit: contain;
+  z-index: 2; 
+  position: relative;
 }
- 
+
+/* Data Area */
 body #root .top-menu .reveal .player-data .content .data {
+  padding: 15px;
+  display: flex;
   flex-direction: column;
-  padding: 1rem;
-  gap: 0.3rem;
+  align-items: center;
+  text-align: center;
 }
- 
+
 body #root .top-menu .reveal .player-data .content .data p {
   font-style: italic;
-  opacity: 0.6;
+  color: #888;
+  font-size: 1rem;
+  margin: 0;
 }
- 
+
 body #root .top-menu .reveal .player-data .content .data h3 {
+  font-family: var(--heading), sans-serif;
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--dark);
+  margin: 5px 0 10px 0;
+  padding-bottom: 10px;
+  border-bottom: 2px dashed var(--dark);
+  width: 100%;
+}
+
+/* Stats Grid */
+body #root .top-menu .reveal .player-data .content .data .stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  width: 100%;
+  gap: 10px;
+  text-align: left;
+}
+
+body #root .top-menu .reveal .player-data .content .data .stat-item {
+  display: flex;
+  flex-direction: column;
+  font-family: var(--heading), sans-serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--dark);
+  line-height: 1.1;
+}
+
+body #root .top-menu .reveal .player-data .content .data .stat-item label {
+  font-size: 0.8rem;
+  color: #888;
+  text-transform: uppercase;
+  font-weight: 400;
+  margin-bottom: 2px;
+}
+
+/* --- Right Column Desktop Layout --- */
+body #root .top-menu .reveal > .column {
+  display: flex;
+  flex-direction: column;
+  width: 200px;
+  margin-left: 20px;
+  gap: 15px; 
+}
+
+/* Action Buttons */
+body #root .top-menu .reveal .buttons-row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+body #root .top-menu .reveal .buttons-row .button {
+  width: 100%;
+  height: 48px;
+  background-color: var(--white);
+  border: none; /* Removed border so the 0px shadow handles it perfectly */
+  
+  /* The authentic stacked border shadow */
+  box-shadow: 
+    0px 0px 0px 3px var(--dark), 
+    1px 1px 0px 3px var(--dark), 
+    2px 2px 0px 3px var(--dark), 
+    3px 3px 0px 3px var(--dark), 
+    4px 4px 0px 3px var(--dark);
+    
+  transform: translate(-4px, -4px); /* Offsets it for the 3D effect */
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.1s linear, box-shadow 0.1s linear;
+}
+
+body #root .top-menu .reveal .buttons-row .button:active,
+body #root .top-menu .reveal .buttons-row .button:hover {
+  transform: translate(0px, 0px);
+  box-shadow: 0px 0px 0px 3px var(--dark);
+}
+
+body #root .top-menu .reveal .buttons-row .button .content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 100%;
+  pointer-events: none;
+}
+
+body #root .top-menu .reveal .buttons-row .button label {
+  font-family: var(--heading2), "Teko", sans-serif;
+  font-size: 1.8rem;
+  font-weight: 500;
+  line-height: 1;
+  margin-top: 4px;
+  color: var(--dark);
+}
+
+body #root .top-menu .reveal .buttons-row .button svg {
+  height: 24px;
+  width: auto;
+}
+
+/* The Cards (Who Is / Results) */
+body #root .top-menu .reveal .who-is-card,
+body #root .top-menu .reveal .result-card {
+  background-color: var(--white);
+  border: none;
+  box-shadow: 
+    0px 0px 0px 3px var(--dark), 
+    1px 1px 0px 3px var(--dark), 
+    2px 2px 0px 3px var(--dark), 
+    3px 3px 0px 3px var(--dark), 
+    4px 4px 0px 3px var(--dark);
+    
+  transform: translate(-4px, -4px);
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+body #root .top-menu .reveal .who-is-card h3 {
+  font-family: var(--heading), sans-serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--dark);
+  line-height: 1.2;
+  text-align: center;
+  margin: 0;
+  padding: 20px 0;
+}
+
+body #root .top-menu .reveal .result-card h3 {
   font-family: var(--heading), sans-serif;
   font-size: 1.4rem;
   font-weight: 800;
-  text-transform: uppercase;
+  color: var(--dark);
+  line-height: 1.1;
+  text-align: left;
+  margin: 0;
 }
- 
-body #root .top-menu .reveal .player-data .content .data h5 {
-  font-family: var(--heading), sans-serif;
-  font-size: 0.95rem;
-  gap: 0.4rem;
-}
- 
-body #root .top-menu .reveal .player-data .content .data h5 label {
-  opacity: 0.55;
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
- 
-/* Right column: result card stacked above buttons */
-body #root .top-menu .reveal > .column {
-  flex-direction: column-reverse; /* buttons on top, card below — reversed in DOM */
-  width: 275px;
-  margin-left: 1.5rem;
-  transition: margin .2s ease-in-out;
-}
- 
-/* Result card (.time) */
-body #root .top-menu .reveal .time .content {
+
+body #root .top-menu .reveal .result-card h5 {
+  display: flex;
   flex-direction: column;
-  padding: 1rem;
-  gap: 0.4rem;
-}
- 
-body #root .top-menu .reveal .time .content h3 {
   font-family: var(--heading), sans-serif;
   font-size: 1.3rem;
-  font-weight: 800;
+  font-weight: 700;
+  color: var(--dark);
+  margin: 0;
 }
- 
-body #root .top-menu .reveal .time .content h5 {
-  font-family: var(--heading), sans-serif;
-  font-size: 0.95rem;
-  gap: 0.4rem;
-  justify-content: space-between;
-}
- 
-body #root .top-menu .reveal .time .content h5 span {
-  font-style: italic;
-  opacity: 0.6;
-  font-size: 0.85rem;
-}
- 
-body #root .top-menu .reveal .time .content h5 label {
-  opacity: 0.55;
+
+body #root .top-menu .reveal .result-card h5 label {
   font-size: 0.8rem;
+  color: #888;
   text-transform: uppercase;
+  font-weight: 400;
 }
- 
-/* Share + Close button row */
-body #root .top-menu .reveal .row {
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0;
-  transition: margin .2s ease-in-out;
-}
- 
-body #root .top-menu .reveal .button {
-  flex-grow: 1;
-}
- 
-body #root .top-menu .expandable-menu .content {
-  height: fit-content;
-}
- 
-/* Responsive: narrow screens stack column below player-data */
-@media (max-width: 660px) {
-  body #root .top-menu .reveal > .column {
-    width: 100%;
-    margin-left: 0;
-    margin-top: 1.5rem;
+
+/* --- Responsive Layout (Mobile Ordering Flip) --- */
+@media (max-width: 650px) {
+  body #root .top-menu .reveal {
+    flex-direction: column;
+    align-items: center;
   }
- 
-  body #root .top-menu .reveal .row {
-    margin-top: 1.5rem;
-  }
-}
- 
-@media (max-width: 1375px) {
-  body #root .top-menu .reveal > .column {
-    width: 175px;
-  }
- 
+  
   body #root .top-menu .reveal .column {
-    justify-content: flex-end;
+    width: 320px;
+    max-width: 100%;
+    margin-left: 0;
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* REORDERING: Card on top, Buttons on bottom for mobile! */
+  body #root .top-menu .reveal .who-is-card,
+  body #root .top-menu .reveal .result-card { 
+    order: 1; 
+  }
+  body #root .top-menu .reveal .buttons-row { 
+    order: 2; 
+    flex-direction: row; /* Put buttons side-by-side */
+    gap: 10px;
+  }
+  
+  body #root .top-menu .reveal .buttons-row .button {
+    flex: 1; /* Stretch buttons equally */
   }
 }
- 
+/* New Result Text Styling */
+body #root .top-menu .reveal .result-card .result-sub {
+  font-family: var(--heading), sans-serif;
+  font-size: 1.05rem;
+  font-style: italic;
+  color: #888;
+  margin-bottom: -6px; /* Pulls the number up tight against the text */
+}
+
+body #root .top-menu .reveal .result-card .result-guesses {
+  font-family: var(--heading), sans-serif;
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--dark);
+  margin-bottom: 5px;
+}

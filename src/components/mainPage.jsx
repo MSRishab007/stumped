@@ -715,86 +715,69 @@ const handleGuessSubmit = (chosenPlayer) => {
         {targetPlayer?.imageLink && (
           <div className={`hint row reveal ${activeModal === 'silhouette' ? '' : 'closed'}`}>
 
-            {/* player-data: headshot + stats — matches Poeltl's .player-data */}
+            {/* --- LEFT COLUMN: PLAYER CARD / SILHOUETTE --- */}
             <div className={`expandable-menu player-data ${activeModal === 'silhouette' ? '' : 'closed'}`}
               aria-hidden={activeModal !== 'silhouette'}
-              aria-label="Mystery Player's Stats"
+              aria-label="Mystery Player"
             >
               <div className="content">
-
-                {/* Headshot */}
-                <div className="headshot">
-                  {gameStatus === 'playing' ? (
+                {gameStatus === 'playing' ? (
+                  /* Mid-Game Silhouette View */
+                  <div className="headshot only-silhouette">
                     <img
                       src={targetPlayer.imageLink}
                       alt="Mystery Player silhouette"
                       style={{ filter: 'brightness(0)' }}
                     />
-                  ) : (
-                    <img
-                      src={targetPlayer.imageLink}
-                      alt={`Headshot of ${targetPlayer.name}`}
-                    />
-                  )}
-                </div>
-
-                {/* Data */}
-                <div className="data">
-                  <p>Today's Player is...</p>
-                  {gameStatus !== 'playing' && <h3>{targetPlayer.name}</h3>}
-                  {gameStatus !== 'playing' && (
-                    <>
-                      <h5><label>Team</label> {targetPlayer.currentFranchise ?? '—'}</h5>
-                      <h5><label>Role</label> {targetPlayer.role ?? '—'}</h5>
-                      <h5><label>Batting</label> {targetPlayer.battingHand ?? '—'}</h5>
-                      <h5><label>Debut</label> {targetPlayer.debutYear ?? '—'}</h5>
-                      <h5><label>Matches</label> {targetPlayer.matches ?? '—'}</h5>
-                    </>
-                  )}
-                </div>
-
+                  </div>
+                ) : (
+                  /* Post-Game ID Card View */
+                  <>
+                    <div className="headshot">
+                      <img
+                        src={targetPlayer.imageLink}
+                        alt={`Headshot of ${targetPlayer.name}`}
+                      />
+                    </div>
+                    <div className="data">
+                      <p>Today's Player is...</p>
+                      <h3>{targetPlayer.name}</h3>
+                      <div className="stats-grid">
+                        <div className="stat-item"><label>Team</label> {targetPlayer.currentFranchise ?? '—'}</div>
+                        <div className="stat-item"><label>Role</label> {targetPlayer.role ? targetPlayer.role.replace(/Top-Order Batter/gi, 'Top Order').replace(/Middle-Order Batter/gi, 'Mid Order').replace(/Bowling Allrounder/gi, 'Bowl AR').replace(/Batting Allrounder/gi, 'Bat AR').replace(/Wicketkeeper/gi, 'WK') : '—'}</div>
+                        <div className="stat-item"><label>Batting</label> {targetPlayer.battingHand ?? '—'}</div>
+                        <div className="stat-item"><label>Age</label> {targetPlayer.dob ? (2026 - parseInt(targetPlayer.dob.split('-')[2] || 2000)) : '—'}</div>
+                        <div className="stat-item"><label>Matches</label> {targetPlayer.matches ?? '—'}</div>
+                        <div className="stat-item"><label>Wickets</label> {targetPlayer.wickets ?? '—'}</div>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 
-            {/* Right column: result card + buttons — matches Poeltl's .column */}
+            {/* --- RIGHT COLUMN: ACTIONS & RESULTS --- */}
             <div className="column">
+              
+              {/* Stacked Action Buttons */}
+              <div className="row buttons-row">
+                {gameStatus !== 'playing' && (
+                  <button
+                    className="button horizontal-button"
+                    role="button"
+                    aria-label="Share Today's Game"
+                    onClick={handleShare}
+                  >
+                    <div className="content">
+                      <svg className="share" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 38.62 31.88">
+                        <path fill="var(--green, #00d200)" d="m1.24,30.87c-.06-.01-.11-.03-.14-.07-.07-.06-.1-.13-.1-.22v-5.69c0-4.33,1.7-8.41,4.78-11.49,3.08-3.08,7.17-4.78,11.5-4.78h4.43V1.47l15.63,12.19-15.63,12.18v-.07h0v-7.06h-2.21c-3.83,0-7.55,1.13-10.74,3.26-3.22,2.15-5.7,5.16-7.18,8.72-.04.09-.09.14-.17.17l-.1.02s-.04,0-.06,0Z"></path>
+                        <path fill="var(--dark)" d="m22.71,3.52l13,10.14-13,10.13v-6.08h-3.21c-4.03,0-7.94,1.19-11.29,3.43-2.55,1.7-4.66,3.92-6.21,6.5v-2.76c0-4.06,1.59-7.89,4.49-10.79,2.89-2.89,6.73-4.49,10.79-4.49h5.43V3.52m-1.45-3.52c-.3,0-.55.24-.55.55v7.06h-3.43c-4.75,0-9.07,1.94-12.2,5.07C1.94,15.82,0,20.13,0,24.88v5.69c0,.42.18.76.45.99.17.15.38.24.59.29.09.02.17.03.26.03.13,0,.27-.02.39-.06.34-.1.64-.34.8-.74,1.41-3.38,3.8-6.26,6.82-8.27,2.92-1.95,6.42-3.09,10.18-3.09h1.21v7.06h0c0,.12.04.24.11.34.11.14.27.21.43.21.12,0,.24-.04.34-.12l16.81-13.11s.07-.06.1-.1c.19-.24.14-.58-.09-.76L21.63.14c-.1-.09-.23-.14-.37-.14h0Z"></path>
+                      </svg>
+                      <label>{copySuccess ? 'Copied!' : 'Share'}</label>
+                    </div>
+                  </button>
+                )}
 
-              {/* Result card — closed during play */}
-              <div
-                className={`expandable-menu time ${gameStatus !== 'playing' ? '' : 'closed'}`}
-                aria-hidden={gameStatus === 'playing'}
-                aria-label="Today's Game Results"
-              >
-                <div className="content">
-                  <h3>{gameStatus === 'won' ? 'You won!' : gameStatus === 'lost' ? 'Oh no, Dhoni was behind the stumps!' : ''}</h3>
-                  {gameStatus === 'won' && (
-                    <h5><span>You got it in... </span>{guesses.length} guess{guesses.length !== 1 ? 'es' : ''}</h5>
-                  )}
-                  {gameStatus === 'lost' && (
-                    <h5><span>Better luck tomorrow</span></h5>
-                  )}
-                  <h5><label>Current Streak</label> {stats.currentStreak}</h5>
-                  <h5>
-                    <label>Time Used</label>{' '}
-                    {Math.floor(seconds / 60)}m {String(seconds % 60).padStart(2, '0')}s
-                  </h5>
-                  <h5><label>Silhouette Used</label> {usedSilhouette ? 'Yes' : 'No'}</h5>
-                </div>
-              </div>
-
-              {/* Share + Close buttons — inside expandable-menu so they hide when reveal is closed */}
-              <div className={`expandable-menu row ${activeModal === 'silhouette' ? '' : 'closed'}`}>
-                <button
-                  className="button horizontal-button"
-                  role="button"
-                  aria-label="Share Today's Game"
-                  onClick={handleShare}
-                >
-                  <div className="content">
-                    <Share size={20} />
-                    <label>{copySuccess ? 'Copied!' : 'Share'}</label>
-                  </div>
-                </button>
                 <button
                   className="button horizontal-button"
                   role="button"
@@ -802,17 +785,42 @@ const handleGuessSubmit = (chosenPlayer) => {
                   onClick={() => setActiveModal(null)}
                 >
                   <div className="content">
-                    <X size={20} />
+                    <svg className="close" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 27.88 27.88">
+                      <path fill="var(--red, red)" d="m23.49,26.88c-.9,0-1.75-.35-2.39-.99l-7.16-7.16-7.16,7.16c-.64.64-1.49.99-2.39.99s-1.75-.35-2.39-.99c-.64-.64-.99-1.49-.99-2.39s.35-1.75.99-2.39l7.16-7.16L1.99,6.78c-.64-.64-.99-1.49-.99-2.39s.35-1.75.99-2.39c.64-.64,1.49-.99,2.39-.99s1.75.35,2.39.99l7.16,7.16,7.16-7.16c.64-.64,1.49-.99,2.39-.99s1.75.35,2.39.99c.64.64.99,1.49.99,2.39s-.35,1.75-.99,2.39l-7.16,7.16,7.16,7.16c.64.64.99,1.49.99,2.39s-.35,1.75-.99,2.39c-.64.64-1.49.99-2.39.99Z"></path>
+                      <path fill="var(--dark)" d="m23.49,2c.61,0,1.22.23,1.69.7.93.93.93,2.44,0,3.37l-7.87,7.87,7.87,7.87c.93.93.93,2.44,0,3.37-.47.47-1.08.7-1.69.7s-1.22-.23-1.69-.7l-7.87-7.87-7.87,7.87c-.47.47-1.08.7-1.69.7s-1.22-.23-1.69-.7c-.93-.93-.93-2.44,0-3.37l7.87-7.87L2.7,6.07c-.93-.93-.93-2.44,0-3.37.47-.47,1.08-.7,1.69-.7s1.22.23,1.69.7l7.87,7.87,7.87-7.87c.47-.47,1.08-.7,1.69-.7m0-2c-1.17,0-2.27.46-3.1,1.28l-6.45,6.45L7.48,1.28c-.83-.83-1.93-1.28-3.1-1.28S2.11.46,1.28,1.28c-.83.83-1.28,1.93-1.28,3.1s.46,2.27,1.28,3.1l6.45,6.45-6.45,6.46c-.83.83-1.28,1.93-1.28,3.1s.46,2.27,1.28,3.1c.83.83,1.93,1.28,3.1,1.28s2.27-.46,3.1-1.28l6.45-6.46,6.45,6.46c.83.83,1.93,1.28,3.1,1.28s2.27-.46,3.1-1.28c.83-.83,1.28-1.93,1.28-3.1s-.46-2.27-1.28-3.1l-6.45-6.45,6.45-6.46c.83-.83,1.28-1.93,1.28-3.1s-.46-2.27-1.28-3.1c-.83-.83-1.93-1.28-3.1-1.28h0Z"></path>
+                    </svg>
                     <label>Close</label>
                   </div>
                 </button>
               </div>
 
+              {/* Cards wrapper (Who Is / Results) */}
+              {gameStatus === 'playing' ? (
+                <div className="who-is-card">
+                  <h3>Who is<br/>today's<br/>player?</h3>
+                </div>
+              ) : (
+                <div className="result-card">
+                  <h3>{gameStatus === 'won' ? 'You won!' : "Sorry! You didn't get today's player"}</h3>
+                  
+                  {/* Poeltl's Guess Count for Winners */}
+                  {gameStatus === 'won' && (
+                    <>
+                      <span className="result-sub">You got it in...</span>
+                      <span className="result-guesses">{guesses.length} guess{guesses.length !== 1 ? 'es' : ''}</span>
+                    </>
+                  )}
+                  
+                  {/* Stats Meta */}
+                  <h5 style={{ marginTop: '5px' }}><label>Current Streak</label> {stats.currentStreak}</h5>
+                  <h5><label>Time</label> {Math.floor(seconds / 60)}m {String(seconds % 60).padStart(2, '0')}s</h5>
+                </div>
+              )}
+
             </div>
           </div>
         )}
-
-      </div>
+        </div>
 
         {/* --- MAIN GAMEPLAY ROW (SEARCH, SILHOUETTE, TIMER) --- */}
         <div
