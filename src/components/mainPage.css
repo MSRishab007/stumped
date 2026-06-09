@@ -470,7 +470,7 @@ body #root .expandable-menu {
   
   /* CSS-only slide down animation */
   max-height: 1000px; 
-  transition: max-height 0.3s ease-in-out, margin 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  transition: max-height .25s ease-in-out, margin .2s ease-in-out, box-shadow .2s ease-in-out, opacity .2s ease-in-out;
   margin-bottom: 1.5rem;
 }
 body #root .expandable-menu.suggestions {
@@ -2176,7 +2176,6 @@ body #root .result-meta-value {
  /* =====================================================
    REVEAL MODAL (POELTL ID-CARD LAYOUT)
    ===================================================== */
-
 /* Outer reveal row */
 body #root .top-menu .reveal {
   display: flex;
@@ -2185,27 +2184,32 @@ body #root .top-menu .reveal {
   justify-content: center;
   flex-wrap: wrap;
   gap: 0;
-  padding: 6px; /* CRITICAL FIX: prevents the 3D transform from being clipped */
-  transition: max-height 0.3s ease-in-out, margin 0.2s ease-in-out, opacity 0.2s ease-in-out;
+  max-width: 800px !important;
+  padding: 12px; /* CRITICAL FIX: prevents the 3D transform from being clipped */
+transition: max-height .25s ease-in-out, margin .2s ease-in-out, opacity .2s ease-in-out, padding .25s ease-in-out;
   max-height: 1500px; /* Bumped up to ensure mobile stacking fits */
   overflow: hidden;
 }
-/* --- THE CRITICAL FIX: Hides the entire row (including buttons) instantly --- */
+
 body #root .top-menu .reveal.closed {
   max-height: 0px !important;
+  padding: 0px !important; /* Forces the 12px padding to collapse so it doesn't leave a gap */
   margin-top: 0 !important;
   margin-bottom: 0 !important;
   opacity: 0;
   pointer-events: none;
+  
+  transition: max-height .25s ease-in-out, margin .2s ease-in-out, opacity .15s ease-out, padding .25s ease-in-out;
 }
 
 /* Player Data Card (ID Card Style) */
 body #root .top-menu .reveal .player-data {
-  width: 360px; 
+  width: 400px; /* INCREASED WIDTH */
   max-width: 100%;
   background-color: var(--white);
   border: none;
   
+  /* The authentic stacked border shadow applied to the card */
   box-shadow: 
     0px 0px 0px 3px var(--dark), 
     1px 1px 0px 3px var(--dark), 
@@ -2222,49 +2226,28 @@ body #root .top-menu .reveal .player-data .content {
   padding: 0; 
 }
 
-/* Headshot Area (White Background) */
+/* Headshot Area (Solid Grey Background) */
 body #root .top-menu .reveal .player-data .content .headshot {
   width: 100%;
-  height: 260px; 
-  background: linear-gradient(
-    to right, 
-    #eaeaea 22%, 
-    var(--white) 22%, 
-    var(--white) 78%, 
-    #eaeaea 78%
-  ); 
-  
+  height: 300px; /* INCREASED HEIGHT */
+  background: var(--grey, #ebebeb); /* SOLID GREY BACKGROUND */
   position: relative;
   display: flex;
   justify-content: center;
-  border-bottom: 2px solid var(--dark);
+  border-bottom: 3px solid var(--dark);
 }
 
 /* Mid-Game Silhouette override */
 body #root .top-menu .reveal .player-data .content .headshot.only-silhouette {
-  background-color: var(--grey); 
+  background-color: var(--grey, #ebebeb); 
   border-bottom: none;
-  height: 290px;
+  height: 340px;
 }
 
-/* Poeltl's signature dashed lines behind the player */
+/* REMOVED DASHED LINES COMPLETELY */
 body #root .top-menu .reveal .player-data .content .headshot::before,
 body #root .top-menu .reveal .player-data .content .headshot::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 0;
-  border-left: 2px dashed var(--dark);
-  z-index: 1;
-}
-body #root .top-menu .reveal .player-data .content .headshot::before { left: 20%; }
-body #root .top-menu .reveal .player-data .content .headshot::after { right: 20%; }
-
-/* Hide dashed lines during mid-game silhouette */
-body #root .top-menu .reveal .player-data .content .headshot.only-silhouette::before,
-body #root .top-menu .reveal .player-data .content .headshot.only-silhouette::after {
-  display: none;
+  display: none !important;
 }
 
 body #root .top-menu .reveal .player-data .content .headshot img {
@@ -2277,7 +2260,7 @@ body #root .top-menu .reveal .player-data .content .headshot img {
 
 /* Data Area */
 body #root .top-menu .reveal .player-data .content .data {
-  padding: 15px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2285,20 +2268,25 @@ body #root .top-menu .reveal .player-data .content .data {
 }
 
 body #root .top-menu .reveal .player-data .content .data p {
-  font-style: italic;
-  color: #888;
-  font-size: 1rem;
+  font-family: var(--heading);
+  font-weight: 700;
+  color: var(--middleGrey);
+  font-size: 1.3rem;
+    font-weight: 600;
+    font-style: italic;
   margin: 0;
+  text-align: left; /* Left aligned */
+  width: 100%;
 }
 
 body #root .top-menu .reveal .player-data .content .data h3 {
   font-family: var(--heading), sans-serif;
-  font-size: 1.8rem;
+  font-size: 2.2rem;
   font-weight: 800;
   color: var(--dark);
   margin: 5px 0 10px 0;
   padding-bottom: 10px;
-  border-bottom: 2px dashed var(--dark);
+  border-bottom: 3px dashed var(--dark);
   width: 100%;
 }
 
@@ -2307,7 +2295,7 @@ body #root .top-menu .reveal .player-data .content .data .stats-grid {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   width: 100%;
-  gap: 10px;
+  gap: 12px;
   text-align: left;
 }
 
@@ -2315,41 +2303,42 @@ body #root .top-menu .reveal .player-data .content .data .stat-item {
   display: flex;
   flex-direction: column;
   font-family: var(--heading), sans-serif;
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   font-weight: 700;
   color: var(--dark);
   line-height: 1.1;
 }
 
 body #root .top-menu .reveal .player-data .content .data .stat-item label {
-  font-size: 0.8rem;
-  color: #888;
+  font-size: 1.2rem;
+  color: var(--middleGrey);
   text-transform: uppercase;
   font-weight: 400;
   margin-bottom: 2px;
+  font-family: var(--heading2);
 }
 
 /* --- Right Column Desktop Layout --- */
 body #root .top-menu .reveal > .column {
   display: flex;
   flex-direction: column;
-  width: 200px;
-  margin-left: 20px;
-  gap: 15px; 
+  width: 220px;
+  margin-left: 30px;
+  gap: 30px; /* CRITICAL: VERTICAL SPACE BETWEEN BUTTONS AND YOU WON PANEL */
 }
 
 /* Action Buttons */
 body #root .top-menu .reveal .buttons-row {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 15px; /* Vertical gap between share and close buttons */
 }
 
 body #root .top-menu .reveal .buttons-row .button {
   width: 100%;
   height: 48px;
   background-color: var(--white);
-  border: none; /* Removed border so the 0px shadow handles it perfectly */
+  border: none; /* Removed border */
   
   /* The authentic stacked border shadow */
   box-shadow: 
@@ -2390,15 +2379,16 @@ body #root .top-menu .reveal .buttons-row .button label {
 }
 
 body #root .top-menu .reveal .buttons-row .button svg {
-  height: 24px;
+  height: 36px;
   width: auto;
 }
 
-/* The Cards (Who Is / Results) */
 body #root .top-menu .reveal .who-is-card,
 body #root .top-menu .reveal .result-card {
   background-color: var(--white);
   border: none;
+  
+  /* Matching Stacked Border Shadow */
   box-shadow: 
     0px 0px 0px 3px var(--dark), 
     1px 1px 0px 3px var(--dark), 
@@ -2407,14 +2397,14 @@ body #root .top-menu .reveal .result-card {
     4px 4px 0px 3px var(--dark);
     
   transform: translate(-4px, -4px);
-  padding: 15px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
 body #root .top-menu .reveal .who-is-card h3 {
-  font-family: var(--heading), sans-serif;
+  font-family: var(--heading);
   font-size: 1.8rem;
   font-weight: 700;
   color: var(--dark);
@@ -2425,8 +2415,8 @@ body #root .top-menu .reveal .who-is-card h3 {
 }
 
 body #root .top-menu .reveal .result-card h3 {
-  font-family: var(--heading), sans-serif;
-  font-size: 1.4rem;
+  font-family: var(--heading);
+  font-size: 1.6rem;
   font-weight: 800;
   color: var(--dark);
   line-height: 1.1;
@@ -2437,34 +2427,52 @@ body #root .top-menu .reveal .result-card h3 {
 body #root .top-menu .reveal .result-card h5 {
   display: flex;
   flex-direction: column;
-  font-family: var(--heading), sans-serif;
-  font-size: 1.3rem;
+  font-family: var(--heading);
+  font-size: 1.4rem;
   font-weight: 700;
   color: var(--dark);
   margin: 0;
 }
 
 body #root .top-menu .reveal .result-card h5 label {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   color: #888;
   text-transform: uppercase;
   font-weight: 400;
 }
 
+/* New Result Text Styling */
+body #root .top-menu .reveal .result-card .result-sub {
+  font-family: var(--heading), sans-serif;
+  font-size: 1.1rem;
+  font-style: italic;
+  color: #888;
+  margin-bottom: -6px; /* Pulls the number up tight against the text */
+}
+
+body #root .top-menu .reveal .result-card .result-guesses {
+  font-family: var(--heading), sans-serif;
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--dark);
+  margin-bottom: 5px;
+}
+
 /* --- Responsive Layout (Mobile Ordering Flip) --- */
-@media (max-width: 650px) {
+@media (max-width: 750px) {
   body #root .top-menu .reveal {
     flex-direction: column;
     align-items: center;
   }
   
-  body #root .top-menu .reveal .column {
-    width: 320px;
+  body #root .top-menu .reveal > .column {
+    width: 400px;
     max-width: 100%;
     margin-left: 0;
-    margin-top: 20px;
+    margin-top: 25px; /* Vertical gap below the player card */
     display: flex;
     flex-direction: column;
+    gap: 25px; /* Vertical gap between Result Card and Buttons */
   }
   
   /* REORDERING: Card on top, Buttons on bottom for mobile! */
@@ -2475,26 +2483,10 @@ body #root .top-menu .reveal .result-card h5 label {
   body #root .top-menu .reveal .buttons-row { 
     order: 2; 
     flex-direction: row; /* Put buttons side-by-side */
-    gap: 10px;
+    gap: 15px; /* CRITICAL: HORIZONTAL SPACE BETWEEN BUTTONS */
   }
   
   body #root .top-menu .reveal .buttons-row .button {
     flex: 1; /* Stretch buttons equally */
   }
-}
-/* New Result Text Styling */
-body #root .top-menu .reveal .result-card .result-sub {
-  font-family: var(--heading), sans-serif;
-  font-size: 1.05rem;
-  font-style: italic;
-  color: #888;
-  margin-bottom: -6px; /* Pulls the number up tight against the text */
-}
-
-body #root .top-menu .reveal .result-card .result-guesses {
-  font-family: var(--heading), sans-serif;
-  font-size: 1.8rem;
-  font-weight: 800;
-  color: var(--dark);
-  margin-bottom: 5px;
 }
