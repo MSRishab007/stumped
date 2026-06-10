@@ -573,14 +573,24 @@ const handleGuessSubmit = (chosenPlayer) => {
       </header>
 
       {/* ACTIVE TIME MACHINE ALERT BANNER */}
-      {activeDate !== realTodayStr && (
-        <div className="flashback-banner" style={{ textAlign: 'center', marginBottom: '20px' }}>
-          ⏳ You are exploring a past match archive: <strong>{displayDateStr}</strong>
-          <button className="return-today-btn game-btn" onClick={() => setActiveDate(realTodayStr)} style={{ marginLeft: '10px' }}>
-            Return to Today
-          </button>
-        </div>
-      )}
+{activeDate !== realTodayStr && (
+  <div className="flashback-banner">
+    <div className="banner-info">
+      <div className="banner-text">
+        <strong>Flashback Archive</strong>
+        <span>
+          
+          Game #{getGameNumber(activeDate)} • {displayDateStr}
+        </span>
+      </div>
+    </div>
+    <button className="return-today-btn game-btn" onClick={() => setActiveDate(realTodayStr)}>
+      <div className="content">
+        <label>Return to Today</label>
+      </div>
+    </button>
+  </div>
+)}
 
       <main className="game-content">
         {/* =========================================
