@@ -1681,9 +1681,29 @@ body #root .guesses .row .badge svg {
     overflow-x: auto;
     padding-bottom: 10px;
   }
+  
+  /* INCREASED from 900px to 1050px to ensure all 10 columns fit the badges */
   body #root .guesses .heading,
   body #root .guesses .guess-wrapper {
-    min-width: 900px;
+    min-width: 1050px; 
+  }
+  
+  /* Shrinks the badge padding slightly on mobile so it fits inside the grid cell */
+  body #root .guesses .row .badge {
+    padding: 2px 4px;
+    gap: 1px;
+  }
+  
+  /* Overrides the cqi container query to strictly prevent text from ballooning on mobile */
+  body #root .guesses .row .badge span {
+    font-size: 0.9rem; 
+    line-height: 1.1;
+  }
+
+  /* Shrinks the directional arrows slightly so they don't push the numbers off-center */
+  body #root .guesses .row .badge svg {
+    width: 14px;
+    height: 14px;
   }
 }
 
