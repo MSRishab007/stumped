@@ -328,13 +328,14 @@ body #root header .group:first-child .logo {
     line-height: 0.8;
     letter-spacing: -2px;
     color: var(--white);
-    -webkit-text-stroke: 3px var(--dark);
+    -webkit-text-stroke: 2px var(--dark);
     text-shadow: 
       0px 1px 0 var(--dark), 0px 2px 0 var(--dark), 0px 3px 0 var(--dark),
       0px 4px 0 var(--primary), 0px 5px 0 var(--primary), 0px 6px 0 var(--primary), 0px 7px 0 var(--primary), 0px 8px 0 var(--primary),
       0px 8px 0 var(--dark), -1px 8px 0 var(--dark), 1px 8px 0 var(--dark);
     padding-bottom: 8px;
     margin: 0;
+    
 }
 
 /* --- THE TAGLINE (H2) --- */
@@ -403,7 +404,7 @@ body #root header .group:first-child h2 span a.ipl-brand .brand-text {
 /* =========================================
    MOBILE RESPONSIVENESS 
    ========================================= */
-@media (max-width: 800px) {
+@media (max-width: 750px) {
     body #root header .group:first-child {
         flex-direction: column;
         align-items: flex-start;
@@ -412,6 +413,11 @@ body #root header .group:first-child h2 span a.ipl-brand .brand-text {
     /* Shrinks the 3D text to match their mobile SVG scaling */
     body #root header .group:first-child .logo {
         font-size: 3.5rem; 
+        transform: scale(0.6, 1.2); 
+        
+        /* Forces the text to stay pinned to the left edge when squished */
+        transform-origin: left center;
+        margin-bottom: 10px;
     }
     
     body #root header .group:first-child h2 {
@@ -2508,5 +2514,114 @@ body #root .top-menu .reveal .result-card .result-guesses {
   
   body #root .top-menu .reveal .buttons-row .button {
     flex: 1; /* Stretch buttons equally */
+  }
+}
+
+/* =========================================
+   FLASHBACK / TIME MACHINE BANNER
+   ========================================= */
+body #root .flashback-banner {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  
+  background-color: var(--grey, #ebebeb);
+  font-family: var(--heading), sans-serif;
+  
+  /* Removed standard border, replaced with the multi-shadow technique */
+  border: none;
+  box-shadow: 
+    0px 0px 0px 3px var(--dark), 
+    1px 1px 0px 3px var(--dark), 
+    2px 2px 0px 3px var(--dark), 
+    3px 3px 0px 3px var(--dark), 
+    4px 4px 0px 3px var(--dark);
+    
+  transform: translate(-4px, -4px);
+  
+  /* Reduced padding to make the overall banner slimmer */
+  padding: 8px 15px; 
+  margin-bottom: 25px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Container for text (Emoji layout removed) */
+body #root .flashback-banner .banner-info {
+  display: flex;
+  align-items: center;
+  text-align: left;
+}
+
+body #root .flashback-banner .banner-text {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Slightly scaled down text to fit the slimmer banner */
+body #root .flashback-banner .banner-text strong {
+  font-size: 1.4rem; 
+  color: var(--dark);
+  font-weight: 800;
+  text-transform: uppercase;
+  line-height: 1.1;
+}
+
+body #root .flashback-banner .banner-text span {
+  font-size: 1.1rem; 
+  color: #666;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: 0.5px;
+}
+
+/* The Return Button */
+body #root .flashback-banner .return-today-btn {
+  height: 38px; /* Slimmer button height */
+  margin: 0;
+  padding: 0 15px;
+  border: none;
+  
+  /* Multi-shadow technique applied directly to the button */
+  box-shadow: 
+    0px 0px 0px 3px var(--dark), 
+    1px 1px 0px 3px var(--dark), 
+    2px 2px 0px 3px var(--dark), 
+    3px 3px 0px 3px var(--dark), 
+    4px 4px 0px 3px var(--dark);
+    
+  transform: translate(-4px, -4px);
+  transition: box-shadow .1s ease-in-out, transform .1s ease-in-out;
+}
+
+/* Flattens on hover/click to just the 3px outline */
+body #root .flashback-banner .return-today-btn:active,
+body #root .flashback-banner .return-today-btn:hover {
+  transform: translate(0px, 0px);
+  box-shadow: 0px 0px 0px 3px var(--dark);
+}
+
+/* Adjusted button text to match new button height */
+body #root .flashback-banner .return-today-btn label {
+  font-size: 1.4rem;
+  margin-top: 2px;
+}
+
+/* --- MOBILE RESPONSIVENESS --- */
+@media (max-width: 650px) {
+  body #root .flashback-banner {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+    padding: 12px;
+  }
+  
+  body #root .flashback-banner .banner-text {
+    align-items: center;
+  }
+  
+  body #root .flashback-banner .return-today-btn {
+    width: 100%; /* Stretches button full width on mobile */
   }
 }
