@@ -6,7 +6,7 @@ const SPECIAL_DATES = {
   '2026-05-24': 3  
 };
 
-const LAUNCH_DATE = new Date(2026, 2, 24); 
+const LAUNCH_DATE = new Date(2026, 5, 14); 
 
 function getScrambledIndex(dayCounter, totalPoolSize) {
   if (totalPoolSize === 0) return 0;
@@ -30,7 +30,8 @@ export function getDailyPlayerForDate(customDateStr) {
     if (customPlayer) return customPlayer;
   }
 
-  const targetablePool = playersData.filter(player => player.isTargetable === true);
+  const targetablePool = playersData.filter(player => player.isTargetable === 1 && player.match > 0);
+  console.log(`Targetable pool size: ${targetablePool.length}`);
 
   const activePool = targetablePool.length > 0 ? targetablePool : playersData;
 

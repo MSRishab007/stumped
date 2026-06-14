@@ -12,7 +12,7 @@ const getTodayStr = () => {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 };
-const LAUNCH_DATE = new Date(2026, 2, 24); // March 24, 2026
+const LAUNCH_DATE = new Date(2026, 5, 14); // June 14, 2026
 
 const DEFAULT_STATS = {
   gamesPlayed: 0,

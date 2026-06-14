@@ -12,7 +12,7 @@ const Landing = () => {
   };
   
   const getGameNumber = () => {
-    const LAUNCH_DATE = new Date(2026, 2, 24); // March 24, 2026
+    const LAUNCH_DATE = new Date(2026, 5, 14); // June 14, 2026
     const diffTime = new Date() - LAUNCH_DATE;
     return Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
   };
