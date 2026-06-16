@@ -29,9 +29,8 @@ export function getDailyPlayerForDate(customDateStr) {
     const customPlayer = playersData.find(p => p.id === targetId);
     if (customPlayer) return customPlayer;
   }
-  console.log(`Total players: ${playersData.length}`);
   const targetablePool = playersData.filter(player => player.isTargetable === 1 && player.matches > 0);
-  console.log(`Targetable pool size: ${targetablePool.length}`);
+
 
   const activePool = targetablePool.length > 0 ? targetablePool : playersData;
 
